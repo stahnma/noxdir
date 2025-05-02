@@ -1,0 +1,200 @@
+package main
+
+import (
+	"errors"
+	"github.com/stretchr/testify/require"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+)
+
+type testEntry struct {
+	name  string
+	files []string
+	dirs  []testEntry
+}
+
+var testEntryInstance = testEntry{
+	name:  "dirsize_root_test_entry",
+	files: []string{"root_file_1", "root_file_2", "root_file_3"},
+	dirs: []testEntry{
+		{
+			name:  "level_1_1",
+			files: []string{"level_1_file_1", "level_1_file_2"},
+		},
+		{
+			name:  "level_1_2",
+			files: []string{"level_1_file_1", "level_1_file_2"},
+		},
+		{
+			name:  "level_1_3",
+			files: []string{"level_1_file_1", "level_1_file_2"},
+			dirs: []testEntry{
+				{
+					name:  "level_2_1",
+					files: []string{"level_2_file_1", "level_2_file_2"},
+				},
+				{
+					name:  "level_2_2",
+					files: []string{"level_2_file_1", "level_2_file_2"},
+					dirs: []testEntry{
+						{
+							name:  "level_3_1",
+							files: []string{"level_3_file_1", "level_3_file_2"},
+						},
+						{
+							name:  "level_3_2",
+							files: []string{"level_3_file_1", "level_3_file_2"},
+						},
+					},
+				},
+				{
+					name:  "level_2_3",
+					files: []string{"level_2_file_1", "level_2_file_2"},
+				},
+			},
+		},
+		{
+			name:  "level_1_4",
+			files: []string{"level_1_file_1", "level_1_file_2"},
+		},
+	},
+}
+
+func TestEntry_Traverse(t *testing.T) {
+	root, err := filepath.Abs(".")
+	require.NoError(t, err)
+
+	entryRoot := initTmpEntry(t, &testEntryInstance, root)
+
+	e := NewDirEntry(entryRoot, time.Now())
+
+	require.NoError(t, e.Traverse())
+	e.CalculateSize()
+
+	require.Equal(t, uint64(4), e.Dirs)
+	require.Equal(t, uint64(3), e.Files)
+
+	require.Equal(t, uint64(21), e.TotalFiles)
+	require.Equal(t, uint64(9), e.TotalDirs)
+
+	verifyEntryStructure(t, e, &testEntryInstance)
+
+	require.NoError(t, os.RemoveAll(entryRoot))
+}
+
+func TestEntry_TraverseAsync(t *testing.T) {
+	root, err := filepath.Abs(".")
+	require.NoError(t, err)
+
+	entryRoot := initTmpEntry(t, &testEntryInstance, root)
+
+	e := NewDirEntry(entryRoot, time.Now())
+
+	done, errCh := e.TraverseAsync()
+
+	select {
+	case err = <-errCh:
+		require.NoError(t, err)
+	case <-time.After(time.Second * 3):
+		t.Fatalf("traverse async failed on timeout")
+	case <-done:
+		break
+	}
+
+	e.CalculateSize()
+
+	require.Equal(t, uint64(4), e.Dirs)
+	require.Equal(t, uint64(3), e.Files)
+
+	require.Equal(t, uint64(21), e.TotalFiles)
+	require.Equal(t, uint64(9), e.TotalDirs)
+
+	verifyEntryStructure(t, e, &testEntryInstance)
+
+	require.NoError(t, os.RemoveAll(entryRoot))
+}
+
+func TestEntry_AddChild(t *testing.T) {
+	e := NewDirEntry("root", time.Now())
+
+	require.False(t, e.HasChild())
+
+	type tableItem struct {
+		isDir bool
+		name  string
+	}
+
+	tableData := []tableItem{
+		{false, "root_file_1"},
+		{false, "root_file_2"},
+		{false, "root_file_3"},
+		{true, "root_dir_1"},
+		{true, "root_dir_2"},
+		{true, "root_dir_3"},
+	}
+
+	for i := range tableData {
+		path := "root" + string(os.PathSeparator) + tableData[i].name
+
+		childEntry := NewFileEntry(path, 1, time.Now())
+
+		if tableData[i].isDir {
+			childEntry = NewDirEntry(path, time.Now())
+		}
+
+		e.AddChild(childEntry)
+
+		require.NotNil(t, e.GetChild(tableData[i].name))
+	}
+
+	require.Len(t, e.Child, 6)
+	require.EqualValues(t, 3, e.Dirs)
+	require.EqualValues(t, 3, e.Files)
+	require.EqualValues(t, 3, e.TotalFiles)
+	require.EqualValues(t, 3, e.TotalDirs)
+}
+
+func verifyEntryStructure(t *testing.T, e *Entry, te *testEntry) {
+	require.Equal(t, te.name, e.Name)
+
+	for i := range te.files {
+		c := e.GetChild(te.files[i])
+
+		require.NotNil(t, c, "child %s not found", te.files[i])
+		require.Equal(t, te.files[i], c.Name)
+	}
+
+	for i := range te.dirs {
+		d := e.GetChild(te.dirs[i].name)
+
+		require.NotNil(t, d)
+		verifyEntryStructure(t, d, &te.dirs[i])
+	}
+}
+
+func initTmpEntry(t *testing.T, et *testEntry, parent string) string {
+	root := parent + string(os.PathSeparator) + et.name
+
+	absRootPath, err := filepath.Abs(root)
+	require.NoError(t, err)
+
+	if _, err = os.Stat(absRootPath); !errors.Is(err, os.ErrNotExist) {
+		return absRootPath
+	}
+
+	require.NoError(t, os.Mkdir(root, 0777))
+
+	for i := range et.files {
+		f, err := os.Create(root + string(os.PathSeparator) + et.files[i])
+		require.NoError(t, err)
+		_ = f.Close()
+	}
+
+	for i := range et.dirs {
+		initTmpEntry(t, &et.dirs[i], root)
+	}
+
+	return absRootPath
+}

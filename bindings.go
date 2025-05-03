@@ -20,7 +20,7 @@ const (
 	sortTotalUsed  bindingKey = "alt+u"
 	sortTotalFree  bindingKey = "alt+f"
 	sortTotalUsedP bindingKey = "alt+g"
-	toggleTopFiles bindingKey = "alt+q"
+	toggleTopFiles bindingKey = "ctrl+q"
 )
 
 var drivesKeyMap = [][]key.Binding{

@@ -52,14 +52,16 @@ func NewList() (*List, error) {
 		return nil, err
 	}
 
-	var stat unix.Statfs_t
-
 	list := &List{pathInfoMap: make(map[string]*Info, len(mntList))}
 
 	for i := range mntList {
-		info, err := mntInfo(mntList[i])
+		info, excluded, err := mntInfo(mntList[i])
 		if err != nil {
 			return nil, err
+		}
+
+		if excluded {
+			continue
 		}
 
 		list.pathInfoMap[mntList[i]] = info
@@ -71,16 +73,18 @@ func NewList() (*List, error) {
 	return list, err
 }
 
-func mntInfo(path string) (*Info, error) {
+func mntInfo(path string) (*Info, bool, error) {
+	var stat unix.Statfs_t
+
 	if err := unix.Statfs(path, &stat); err != nil {
-		return nil, fmt.Errorf("failed to statfs: %v", err)
+		return nil, false, fmt.Errorf("failed to statfs: %v", err)
 	}
 
-	fsName, _ := fsTypesMap[stat.Type]
+	fsName, _ := fsTypesMap[int64(stat.Type)]
 
-	// use implicitly defined list of excluded FS types rather than names map
-	if _, ok := excludedFSTypes[stat.Type]; ok || stat.Blocks == 0 {
-		continue
+	// use an implicitly defined list of excluded FS types rather than names map
+	if _, ok := excludedFSTypes[int64(stat.Type)]; ok || stat.Blocks == 0 {
+		return nil, true, nil
 	}
 
 	usedBlocks := (stat.Blocks - stat.Bfree) * uint64(stat.Bsize)
@@ -93,6 +97,8 @@ func mntInfo(path string) (*Info, error) {
 		UsedBytes:   usedBlocks * uint64(stat.Bsize),
 		UsedPercent: (float64(usedBlocks) / float64(stat.Blocks)) * 100,
 	}
+
+	return info, false, nil
 }
 
 func mounts() ([]string, error) {

@@ -1,6 +1,6 @@
-# 🧹 DiskSweep
+# 🧹 NoxDir
 
-**DirSize** is a fast, cross-platform CLI tool for scanning your file system.
+**NoxDir** is a fast, cross-platform CLI tool for scanning your file system.
 It detects mounted drives or volumes and displays space usage in a clean,
 interactive terminal UI. Ideal for figuring out what’s eating up your disk space
 and where to clean up first.
@@ -45,7 +45,7 @@ go build -o disksweep
 Just run:
 
 ```bash
-dirsize
+noxdir
 ```
 
 No flags, no fuss. It starts the interactive UI immediately.

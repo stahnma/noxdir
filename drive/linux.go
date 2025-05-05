@@ -5,6 +5,7 @@ package drive
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,7 +16,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const NTFS_SB_MAGIC = 0x5346544e
+const NTFSSbMagic = 0x5346544e
 
 const mountInfoPath = "/proc/self/mounts"
 
@@ -48,7 +49,7 @@ var fsTypesMap = map[int64]string{
 	unix.NFS_SUPER_MAGIC:   "nfs",
 	unix.MSDOS_SUPER_MAGIC: "msdos",
 	unix.V9FS_MAGIC:        "v9",
-	NTFS_SB_MAGIC:          "ntfs",
+	NTFSSbMagic:            "ntfs",
 }
 
 func NewList() (*List, error) {
@@ -60,10 +61,10 @@ func NewList() (*List, error) {
 	list := &List{pathInfoMap: make(map[string]*Info, len(mntList))}
 
 	for i := range mntList {
-		info, excluded, err := mntInfo(mntList[i])
+		info, excluded, mntErr := mntInfo(mntList[i])
 		// suppress an error mostly related to the permissions, and requires
 		// root access.
-		if excluded || err != nil {
+		if excluded || mntErr != nil {
 			continue
 		}
 
@@ -73,7 +74,7 @@ func NewList() (*List, error) {
 		list.TotalUsed += info.UsedBytes
 	}
 
-	return list, err
+	return list, nil
 }
 
 func NewFileInfo(name string, data *unix.Stat_t) FileInfo {
@@ -81,7 +82,7 @@ func NewFileInfo(name string, data *unix.Stat_t) FileInfo {
 		name:    name,
 		isDir:   data.Mode&unix.S_IFMT == unix.S_IFDIR,
 		size:    data.Size,
-		modTime: time.Unix(int64(data.Mtim.Sec), int64(data.Mtim.Nsec)),
+		modTime: time.Unix(data.Mtim.Sec, data.Mtim.Nsec),
 	}
 }
 
@@ -89,22 +90,25 @@ func mntInfo(path string) (*Info, bool, error) {
 	var stat unix.Statfs_t
 
 	if err := unix.Statfs(path, &stat); err != nil {
-		return nil, false, fmt.Errorf("failed to statfs: %v", err)
+		return nil, false, fmt.Errorf("failed to statfs: %w", err)
 	}
 
 	// use an implicitly defined list of excluded FS types rather than names map
-	if _, ok := excludedFSTypes[int64(stat.Type)]; ok || stat.Blocks == 0 {
+	if _, ok := excludedFSTypes[stat.Type]; ok || stat.Blocks == 0 {
 		return nil, true, nil
 	}
+
+	//nolint:gosec // try guessing
+	blockSize := uint64(stat.Bsize)
 
 	usedBlocks := stat.Blocks - stat.Bfree
 
 	info := &Info{
 		Path:        path,
-		FSName:      fsTypesMap[int64(stat.Type)],
-		TotalBytes:  stat.Blocks * uint64(stat.Bsize),
-		FreeBytes:   stat.Bfree * uint64(stat.Bsize),
-		UsedBytes:   usedBlocks * uint64(stat.Bsize),
+		FSName:      fsTypesMap[stat.Type],
+		TotalBytes:  stat.Blocks * blockSize,
+		FreeBytes:   stat.Bfree * blockSize,
+		UsedBytes:   usedBlocks * blockSize,
 		UsedPercent: (float64(usedBlocks) / float64(stat.Blocks)) * 100,
 	}
 
@@ -163,13 +167,19 @@ func ReadDir(path string) ([]FileInfo, error) {
 		_ = unix.Close(fd)
 	}(fd)
 
-	buf := direntBufPool.Get().(*[]byte)
+	buf, ok := direntBufPool.Get().(*[]byte)
+	if !ok {
+		return nil, errors.New("get dirent buffer")
+	}
+
 	defer direntBufPool.Put(buf)
 
 	fis := make([]FileInfo, 0, 32)
 
+	var n int
+
 	for {
-		n, err := unix.Getdents(fd, *buf)
+		n, err = unix.Getdents(fd, *buf)
 		if err != nil {
 			return nil, fmt.Errorf("getdents error: %w", err)
 		}
@@ -186,16 +196,10 @@ func ReadDir(path string) ([]FileInfo, error) {
 			nameBytes := (*[256]byte)(unsafe.Pointer(&dirent.Name[0]))
 			name := bytePtrToString(nameBytes[:])
 
-			if name == "." || name == ".." {
+			if pathExcluded(path, name) {
 				offset += int(dirent.Reclen)
-				continue
-			}
 
-			if excludedChild, excluded := excludedPaths[path]; excluded {
-				if _, childExcluded := excludedChild[name]; childExcluded {
-					offset += int(dirent.Reclen)
-					continue
-				}
+				continue
 			}
 
 			var stat unix.Stat_t
@@ -220,7 +224,7 @@ func Explore(path string) error {
 	cmd := exec.Command("xdg-open", path)
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("error starting open: %v", err)
+		return fmt.Errorf("error starting open: %w", err)
 	}
 
 	go func() {
@@ -230,8 +234,22 @@ func Explore(path string) error {
 	return nil
 }
 
+func pathExcluded(path, name string) bool {
+	if name == "." || name == ".." {
+		return true
+	}
+
+	if excludedChild, excluded := excludedPaths[path]; excluded {
+		_, childExcluded := excludedChild[name]
+
+		return childExcluded
+	}
+
+	return false
+}
+
 func bytePtrToString(b []byte) string {
-	for n := 0; n < len(b); n++ {
+	for n := range b {
 		if b[n] == 0 {
 			return string(b[:n])
 		}

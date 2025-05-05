@@ -2,12 +2,13 @@ package main
 
 import (
 	"container/heap"
-	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -17,13 +18,13 @@ const (
 
 type DirModel struct {
 	columns       []Column
-	lastErr       []error
 	dirsTable     *table.Model
 	topFilesTable *table.Model
 	nav           *Navigation
-	showTopFiles  bool
+	lastErr       []error
 	width         int
 	height        int
+	showTopFiles  bool
 }
 
 func NewDirModel(nav *Navigation) *DirModel {
@@ -162,8 +163,8 @@ func (dm *DirModel) updateTableData() {
 
 	fillProgress := NewProgressBar(progressWidth, '🟥', ' ')
 
-	var rows []table.Row
-	dm.nav.Entry().SortChild(false)
+	rows := make([]table.Row, 0, len(dm.nav.Entry().Child))
+	dm.nav.Entry().SortChild()
 
 	for _, child := range dm.nav.Entry().Child {
 		totalDirs, totalFiles := "", ""
@@ -262,7 +263,10 @@ func (dm *DirModel) fillTopFiles() {
 	heap.Pop(&topFilesInstance)
 
 	for i := len(rows) - 1; i >= 0; i-- {
-		file := heap.Pop(&topFilesInstance).(*Entry)
+		file, ok := heap.Pop(&topFilesInstance).(*Entry)
+		if !ok {
+			continue
+		}
 
 		path := strings.TrimSuffix(
 			strings.TrimPrefix(file.Path, dm.nav.currentDrive.Path),

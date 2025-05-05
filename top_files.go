@@ -10,9 +10,9 @@ import (
 // sizes. The topFiles could contain up to n files, where n is defined by the
 // topFiles.size. Other files will be discarded.
 type topFiles struct {
-	size  int
 	files []*Entry
 	mx    sync.RWMutex
+	size  int
 }
 
 // PushSafe provides a thread-safe method for adding elements to the queue.
@@ -51,5 +51,10 @@ func (tf *topFiles) Pop() (v any) {
 }
 
 func (tf *topFiles) Push(v any) {
-	tf.files = append(tf.files, v.(*Entry))
+	entry, ok := v.(*Entry)
+	if !ok {
+		return
+	}
+
+	tf.files = append(tf.files, entry)
 }

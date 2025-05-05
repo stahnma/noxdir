@@ -1,16 +1,21 @@
 package main
 
 import (
-	"dirsize/drive"
+	"fmt"
+	"time"
+
+	"github.com/crumbyte/noxdir/drive"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/muesli/termenv"
-	"log"
-	"time"
 )
+
+const updateTickerInterval = time.Millisecond * 500
 
 type (
 	updateDirState struct{}
@@ -20,11 +25,10 @@ type (
 var teaProg *tea.Program
 
 type ViewModel struct {
-	lastErr    []error
 	driveModel *DriveModel
 	dirModel   *DirModel
-	sortOrder  SortOrder
 	nav        *Navigation
+	lastErr    []error
 	width      int
 }
 
@@ -64,6 +68,14 @@ func (vm *ViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return vm, tea.Batch(cmd)
 }
 
+func (vm *ViewModel) View() string {
+	if vm.nav.State() == Drives {
+		return vm.driveModel.View()
+	}
+
+	return vm.dirModel.View()
+}
+
 func (vm *ViewModel) levelDown() {
 	if !vm.nav.Lock() {
 		return
@@ -77,7 +89,7 @@ func (vm *ViewModel) levelDown() {
 
 	done, errChan := vm.nav.LevelDown(
 		sr[1],
-		func(e *Entry, s State) {
+		func(_ *Entry, _ State) {
 			vm.dirModel.updateTableData()
 		},
 	)
@@ -91,7 +103,7 @@ func (vm *ViewModel) levelDown() {
 	go func() {
 		vm.lastErr = []error{}
 
-		ticker := time.NewTicker(time.Millisecond * 500)
+		ticker := time.NewTicker(updateTickerInterval)
 		defer func() {
 			ticker.Stop()
 			vm.nav.Unlock()
@@ -134,14 +146,6 @@ func (vm *ViewModel) levelUp() {
 	vm.dirModel.updateTableData()
 }
 
-func (vm *ViewModel) View() string {
-	if vm.nav.State() == Drives {
-		return vm.driveModel.View()
-	}
-
-	return vm.dirModel.View()
-}
-
 func NewProgressBar(width int, full, empty rune) progress.Model {
 	maxCharLen := max(
 		lipgloss.Width(string(full)),
@@ -156,10 +160,10 @@ func NewProgressBar(width int, full, empty rune) progress.Model {
 	)
 }
 
-func Render() {
+func Render() error {
 	drivesList, err := drive.NewList()
 	if err != nil {
-		log.Fatalf("Error running program: %s", err.Error())
+		return fmt.Errorf("drive.NewList: %w", err)
 	}
 
 	teaProg = tea.NewProgram(
@@ -167,8 +171,10 @@ func Render() {
 	)
 
 	if _, err = teaProg.Run(); err != nil {
-		log.Fatalf("Error running program: %s", err.Error())
+		return fmt.Errorf("tea.Run: %w", err)
 	}
+
+	return nil
 }
 
 func buildTable() *table.Model {

@@ -1,15 +1,14 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	_ "net/http/pprof"
+	"log/slog"
 )
 
 func main() {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
+	logger := slog.Default()
 
-	Render()
+	if err := Render(); err != nil {
+		// TODO: display error properly formatted
+		logger.Error(err.Error())
+	}
 }

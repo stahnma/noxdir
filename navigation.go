@@ -1,12 +1,11 @@
 package main
 
 import (
-	"dirsize/drive"
 	"sync/atomic"
 	"time"
-)
 
-type SortOrder int
+	"github.com/crumbyte/noxdir/drive"
+)
 
 // State defines a custom type representing a current GUI state.
 type State int
@@ -19,12 +18,12 @@ const (
 type ChangeLevelHandler func(e *Entry, s State)
 
 type Navigation struct {
-	state        State
-	locked       atomic.Bool
 	entry        *Entry
 	drives       *drive.List
 	currentDrive *drive.Info
 	entryStack   []*Entry
+	state        State
+	locked       atomic.Bool
 }
 
 func NewNavigation(l *drive.List) *Navigation {
@@ -51,16 +50,16 @@ func (n *Navigation) Locked() bool {
 }
 
 func (n *Navigation) Lock() bool {
-	return n.locked.Swap(true) == false
+	return !n.locked.Swap(true)
 }
 
-func (n *Navigation) Unlock() bool {
-	return n.locked.Swap(false) == true
+func (n *Navigation) Unlock() {
+	n.locked.Swap(false)
 }
 
-func (n *Navigation) ParentSize() int64 {
+func (n *Navigation) ParentSize() uint64 {
 	if n.entry == nil {
-		return int64(n.currentDrive.UsedBytes)
+		return n.currentDrive.UsedBytes
 	}
 
 	return n.entry.Size

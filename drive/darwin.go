@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"golang.org/x/sys/unix"
 )
@@ -23,8 +22,10 @@ var excludedVolumes = map[string]struct{}{
 	"/System/Volumes/Data/home":  {},
 }
 
-var excludedPaths = map[string]struct{}{
-	"/System/Volumes/Data/Volumes": {},
+var excludedPaths = map[string]map[string]struct{}{
+	"/System/Volumes/Data/": {
+		"Volumes": {},
+	},
 }
 
 func NewList() (*List, error) {
@@ -97,18 +98,14 @@ func ReadDir(path string) ([]FileInfo, error) {
 	}
 
 	for _, child := range nodeEntries {
-		if child.IsDir() {
-			fullPath := path
+		excludedChild, excluded := excludedPaths[path]
 
-			if fullPath[len(fullPath)-1] != filepath.Separator {
-				fullPath += string(filepath.Separator)
-			}
-
-			fullPath += child.Name()
-
-			if _, excluded := excludedPaths[fullPath]; excluded {
+		if child.IsDir() && excluded {
+			if _, childExcluded := excludedChild[child]; childExcluded {
+				offset += int(dirent.Reclen)
 				continue
 			}
+
 		}
 
 		fis = append(

@@ -3,7 +3,6 @@ package main
 import (
 	"cmp"
 	"container/heap"
-	"dirsize/drive"
 	"errors"
 	"path/filepath"
 	"runtime"
@@ -11,12 +10,16 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/crumbyte/noxdir/drive"
 )
 
 const (
-	workerTimeout = time.Second * 2
-	workerReset   = time.Second
-	maxTopFiles   = 16
+	workerTimeout    = time.Second * 2
+	workerReset      = time.Second
+	maxTopFiles      = 16
+	childPathBufSize = 512
+	bfsQueueSize     = 64
 )
 
 var topFilesInstance = topFiles{size: maxTopFiles}
@@ -32,8 +35,17 @@ type Entry struct {
 	// Name contains the last part of the Path property.
 	Name string
 
+	// ModTime contains the last modification time of the entry.
+	ModTime time.Time
+
+	// Child contains a list of all child instances including both files and
+	// directories. If the current Entry instance represents a file, this
+	// property will always be a nil.
+	Child []*Entry
+	mx    sync.RWMutex
+
 	// Size contains a total tail in bytes including sizes of all child entries.
-	Size int64
+	Size uint64
 
 	// Dirs contain the number of directories within the current entry. This
 	// property will always be zero if the current instance represents a file.
@@ -53,19 +65,9 @@ type Entry struct {
 	// zero if the current instance represents a file.
 	TotalFiles uint64
 
-	// ModTime contains the last modification time of the entry.
-	ModTime time.Time
-
-	// Child contains a list of all child instances including both files and
-	// directories. If the current Entry instance represents a file, this
-	// property will always be a nil.
-	Child []*Entry
-
 	// IsDir defines whether the current instance represents a dir or a file.
-	IsDir bool
-
+	IsDir            bool
 	calculateSizeSem atomic.Bool
-	mx               sync.RWMutex
 }
 
 func NewDirEntry(path string, modTime time.Time) *Entry {
@@ -78,7 +80,7 @@ func NewDirEntry(path string, modTime time.Time) *Entry {
 	}
 }
 
-func NewFileEntry(path string, size int64, modTime time.Time) *Entry {
+func NewFileEntry(path string, size uint64, modTime time.Time) *Entry {
 	return &Entry{
 		Path:    path,
 		Name:    filepath.Base(path),
@@ -131,7 +133,7 @@ func (e *Entry) AddChild(child *Entry) {
 // This function call will recursively calculate the sizes of child entries. The
 // final [Entry.Size] field will be a sum of the sizes of all nested files. If
 // the current entry represents a file, only its own tail will be returned.
-func (e *Entry) CalculateSize() int64 {
+func (e *Entry) CalculateSize() uint64 {
 	if e.calculateSizeSem.Swap(true) || !e.IsDir {
 		return e.Size
 	}
@@ -160,7 +162,7 @@ func (e *Entry) HasChild() bool {
 	return len(e.Child) != 0
 }
 
-func (e *Entry) SortChild(desc bool) *Entry {
+func (e *Entry) SortChild() *Entry {
 	slices.SortFunc(e.Child, func(a, b *Entry) int {
 		return cmp.Compare(b.Size, a.Size)
 	})
@@ -213,7 +215,7 @@ func (e *Entry) TraverseAsync() (chan struct{}, chan error) {
 		return nil, nil
 	}
 
-	queue := make(chan *Entry, 64)
+	queue := make(chan *Entry, bfsQueueSize)
 	done, errChan := make(chan struct{}), make(chan error, 1)
 
 	queue <- e
@@ -264,7 +266,8 @@ func (e *Entry) TraverseAsync() (chan struct{}, chan error) {
 
 var childPathBufPool = sync.Pool{
 	New: func() any {
-		b := make([]byte, 0, 512)
+		b := make([]byte, 0, childPathBufSize)
+
 		return &b
 	},
 }
@@ -281,7 +284,11 @@ func handleEntry(e *Entry, onNewDir func(*Entry), onErr func(error)) {
 		return
 	}
 
-	nameBuf := childPathBufPool.Get().(*[]byte)
+	nameBuf, ok := childPathBufPool.Get().(*[]byte)
+	if !ok {
+		return
+	}
+
 	defer childPathBufPool.Put(nameBuf)
 
 	for _, child := range nodeEntries {

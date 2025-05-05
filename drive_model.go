@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"dirsize/drive"
+	"github.com/crumbyte/noxdir/drive"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -13,10 +13,9 @@ import (
 
 type DriveModel struct {
 	driveColumns []Column
-	sortState    SortState
 	drivesTable  *table.Model
-	sortOrder    SortOrder
 	nav          *Navigation
+	sortState    SortState
 	width        int
 }
 
@@ -132,8 +131,8 @@ func (dm *DriveModel) updateTableData(key drive.SortKey, sortDesc bool) {
 			d.Path,
 			d.Volume,
 			d.FSName,
-			fmtSize(d.UsedBytes, true),
 			fmtSize(d.TotalBytes, true),
+			fmtSize(d.UsedBytes, true),
 			fmtSize(d.FreeBytes, true),
 			strconv.FormatFloat(d.UsedPercent, 'f', 2, 64) + " %",
 			lipgloss.JoinHorizontal(

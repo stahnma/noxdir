@@ -2,11 +2,12 @@ package main
 
 import (
 	"errors"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 type testEntry struct {
@@ -16,7 +17,7 @@ type testEntry struct {
 }
 
 var testEntryInstance = testEntry{
-	name:  "dirsize_root_test_entry",
+	name:  "noxdir_root_test_entry",
 	files: []string{"root_file_1", "root_file_2", "root_file_3"},
 	dirs: []testEntry{
 		{
@@ -122,17 +123,17 @@ func TestEntry_AddChild(t *testing.T) {
 	require.False(t, e.HasChild())
 
 	type tableItem struct {
-		isDir bool
 		name  string
+		isDir bool
 	}
 
 	tableData := []tableItem{
-		{false, "root_file_1"},
-		{false, "root_file_2"},
-		{false, "root_file_3"},
-		{true, "root_dir_1"},
-		{true, "root_dir_2"},
-		{true, "root_dir_3"},
+		{"root_file_1", false},
+		{"root_file_2", false},
+		{"root_file_3", false},
+		{"root_dir_1", true},
+		{"root_dir_2", true},
+		{"root_dir_3", true},
 	}
 
 	for i := range tableData {
@@ -157,6 +158,8 @@ func TestEntry_AddChild(t *testing.T) {
 }
 
 func verifyEntryStructure(t *testing.T, e *Entry, te *testEntry) {
+	t.Helper()
+
 	require.Equal(t, te.name, e.Name)
 
 	for i := range te.files {
@@ -175,6 +178,8 @@ func verifyEntryStructure(t *testing.T, e *Entry, te *testEntry) {
 }
 
 func initTmpEntry(t *testing.T, et *testEntry, parent string) string {
+	t.Helper()
+
 	root := parent + string(os.PathSeparator) + et.name
 
 	absRootPath, err := filepath.Abs(root)
@@ -187,7 +192,9 @@ func initTmpEntry(t *testing.T, et *testEntry, parent string) string {
 	require.NoError(t, os.Mkdir(root, 0777))
 
 	for i := range et.files {
-		f, err := os.Create(root + string(os.PathSeparator) + et.files[i])
+		var f *os.File
+
+		f, err = os.Create(root + string(os.PathSeparator) + et.files[i])
 		require.NoError(t, err)
 		_ = f.Close()
 	}

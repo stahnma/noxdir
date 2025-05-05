@@ -6,9 +6,13 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"golang.org/x/sys/unix"
 	"os"
-	path2 "path"
+	"os/exec"
+	"sync"
+	"time"
+	"unsafe"
+
+	"golang.org/x/sys/unix"
 )
 
 const NTFS_SB_MAGIC = 0x5346544e
@@ -27,13 +31,14 @@ var excludedFSTypes = map[int64]struct{}{
 	unix.SECURITYFS_MAGIC:      {},
 }
 
-var excludedPaths = map[string]struct{}{
-	"/proc":       {},
-	"/mnt":        {},
-	"/sys":        {},
-	"/lost+found": {},
-	"/boot":       {},
-	"/":           {},
+var excludedPaths = map[string]map[string]struct{}{
+	"/": {
+		"mnt":        {},
+		"sys":        {},
+		"lost+found": {},
+		"boot":       {},
+		"proc":       {},
+	},
 }
 
 var fsTypesMap = map[int64]string{
@@ -56,11 +61,9 @@ func NewList() (*List, error) {
 
 	for i := range mntList {
 		info, excluded, err := mntInfo(mntList[i])
-		if err != nil {
-			return nil, err
-		}
-
-		if excluded {
+		// suppress an error mostly related to the permissions, and requires
+		// root access.
+		if excluded || err != nil {
 			continue
 		}
 
@@ -73,6 +76,15 @@ func NewList() (*List, error) {
 	return list, err
 }
 
+func NewFileInfo(name string, data *unix.Stat_t) FileInfo {
+	return FileInfo{
+		name:    name,
+		isDir:   data.Mode&unix.S_IFMT == unix.S_IFDIR,
+		size:    data.Size,
+		modTime: time.Unix(data.Mtim.Sec, data.Mtim.Nsec),
+	}
+}
+
 func mntInfo(path string) (*Info, bool, error) {
 	var stat unix.Statfs_t
 
@@ -80,18 +92,16 @@ func mntInfo(path string) (*Info, bool, error) {
 		return nil, false, fmt.Errorf("failed to statfs: %v", err)
 	}
 
-	fsName, _ := fsTypesMap[int64(stat.Type)]
-
 	// use an implicitly defined list of excluded FS types rather than names map
 	if _, ok := excludedFSTypes[int64(stat.Type)]; ok || stat.Blocks == 0 {
 		return nil, true, nil
 	}
 
-	usedBlocks := (stat.Blocks - stat.Bfree) * uint64(stat.Bsize)
+	usedBlocks := stat.Blocks - stat.Bfree
 
 	info := &Info{
 		Path:        path,
-		FSName:      fsName,
+		FSName:      fsTypesMap[int64(stat.Type)],
 		TotalBytes:  stat.Blocks * uint64(stat.Bsize),
 		FreeBytes:   stat.Bfree * uint64(stat.Bsize),
 		UsedBytes:   usedBlocks * uint64(stat.Bsize),
@@ -135,32 +145,97 @@ func mounts() ([]string, error) {
 	return mntList, nil
 }
 
-func ReadDir(path string) ([]os.FileInfo, error) {
-	var infos []os.FileInfo
+var direntBufPool = sync.Pool{
+	New: func() any {
+		b := make([]byte, 1024*64)
 
-	entry, err := os.Open(path)
+		return &b
+	},
+}
+
+func ReadDir(path string) ([]FileInfo, error) {
+	fd, err := unix.Open(path, unix.O_RDONLY|unix.O_DIRECTORY, 0)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open %s: %w", path, err)
 	}
 
-	defer func() {
-		_ = entry.Close()
-	}()
+	defer func(fd int) {
+		_ = unix.Close(fd)
+	}(fd)
 
-	nodeEntries, err := entry.Readdir(-1)
-	if err != nil {
-		return nil, err
-	}
+	buf := direntBufPool.Get().(*[]byte)
+	defer direntBufPool.Put(buf)
 
-	for _, child := range nodeEntries {
-		if _, exclude := excludedPaths[path2.Join(path, child.Name())]; !exclude {
-			infos = append(infos, child)
+	fis := make([]FileInfo, 0, 32)
+
+	for {
+		n, err := unix.Getdents(fd, *buf)
+		if err != nil {
+			return nil, fmt.Errorf("getdents error: %w", err)
+		}
+
+		if n == 0 {
+			break
+		}
+
+		offset := 0
+
+		for offset < n {
+			dirent := (*unix.Dirent)(unsafe.Pointer(&(*buf)[offset]))
+
+			nameBytes := (*[256]byte)(unsafe.Pointer(&dirent.Name[0]))
+			name := bytePtrToString(nameBytes[:])
+
+			if name == "." || name == ".." {
+				offset += int(dirent.Reclen)
+				continue
+			}
+
+			if excludedChild, excluded := excludedPaths[path]; excluded {
+				if _, childExcluded := excludedChild[name]; childExcluded {
+					offset += int(dirent.Reclen)
+					continue
+				}
+			}
+
+			var stat unix.Stat_t
+
+			err = unix.Fstatat(fd, name, &stat, unix.AT_SYMLINK_NOFOLLOW)
+			if err == nil {
+				fis = append(fis, NewFileInfo(name, &stat))
+			}
+
+			offset += int(dirent.Reclen)
 		}
 	}
 
-	return infos, nil
+	return fis, nil
 }
 
 func Explore(path string) error {
+	if len(path) == 0 {
+		return nil
+	}
+
+	cmd := exec.Command("xdg-open", path)
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("error starting open: %v", err)
+	}
+
+	go func() {
+		_ = cmd.Wait()
+	}()
+
 	return nil
+}
+
+func bytePtrToString(b []byte) string {
+	for n := 0; n < len(b); n++ {
+		if b[n] == 0 {
+			return string(b[:n])
+		}
+	}
+
+	return ""
 }

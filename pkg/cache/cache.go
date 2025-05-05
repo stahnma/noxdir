@@ -2,8 +2,7 @@ package cache
 
 import (
 	"compress/gzip"
-	"crypto"
-	_ "crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -19,7 +18,7 @@ const DefaultCachePath = "./cache"
 // not found.
 var ErrNoCache = errors.New("cache entry not found")
 
-// Option defines a type for providing configuration options for Cache instance/
+// Option defines a type for providing configuration options for Cache instance.
 type Option func(*Cache)
 
 // WithCacheDir allows setting a custom path for storing cache files. By default,
@@ -167,7 +166,7 @@ func (c *Cache) keyHash(key string) string {
 		return ""
 	}
 
-	h := crypto.SHA1.New()
+	h := sha256.New()
 	h.Write([]byte(key))
 
 	return hex.EncodeToString(h.Sum(nil))

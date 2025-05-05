@@ -52,7 +52,7 @@ func NewFileInfo(data *win32finddata1) FileInfo {
 	return FileInfo{
 		name:    syscall.UTF16ToString(data.FileName[:]),
 		isDir:   data.FileAttributes&16 != 0,
-		size:    int64(data.FileSizeHigh)<<32 + int64(data.FileSizeLow),
+		size:    uint64(data.FileSizeHigh)<<32 + uint64(data.FileSizeLow),
 		modTime: time.Unix(0, data.LastWriteTime.Nanoseconds()),
 	}
 }
@@ -105,8 +105,9 @@ func NewList() (*List, error) {
 	for _, disk := range disks {
 		path := string(disk) + ":\\"
 
-		di, err := NewInfo(path)
-		if err != nil {
+		var di Info
+
+		if di, err = NewInfo(path); err != nil {
 			return nil, err
 		}
 
@@ -164,7 +165,7 @@ func logicalDrives() ([]byte, error) {
 			disks = append(disks, byte(diskIdx))
 		}
 
-		disksBitmask = disksBitmask >> 1
+		disksBitmask >>= 1
 	}
 
 	return disks, nil
@@ -177,8 +178,8 @@ func volumeInfo(path []byte) (string, string, error) {
 	var (
 		volumeNameBuffer     = make([]uint8, 32)
 		fsNameBuffer         = make([]byte, 8)
-		volumeNameBufferSize = uint32(len(volumeNameBuffer))
-		fsNameBufferSize     = uint32(len(fsNameBuffer))
+		volumeNameBufferSize = uint32(32)
+		fsNameBufferSize     = uint32(8)
 	)
 
 	vi, _, err := procGetVolumeInformation.Call(
@@ -262,28 +263,29 @@ func ReadDir(path string) ([]FileInfo, error) {
 		return nil, fmt.Errorf("drive: UTF16PtrFromString: %w", err)
 	}
 
-	handler, _, err := syscall.SyscallN(
+	handle, _, errno := syscall.SyscallN(
 		procFindFirstFile.Addr(),
 		uintptr(unsafe.Pointer(pathPtr)),
 		uintptr(unsafe.Pointer(&data)),
 	)
 
-	hw := newHandleWrapper(handler)
+	hw := newHandleWrapper(handle)
 
-	if hw.handle == syscall.InvalidHandle && err != nil {
-		return nil, fmt.Errorf("drive: FindFirstFile: %s", err.Error())
+	if hw.handle == syscall.InvalidHandle && errno != 0 {
+		return nil, fmt.Errorf("drive: FindFirstFile: %w", errno)
 	}
 
 	for {
 		name := data.FileName
 
+		//nolint:staticcheck // the alternative is even worse
 		if !(name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) {
 			fis = append(fis, NewFileInfo(&data))
 		}
 
 		result, _, _ := syscall.SyscallN(
 			procFindNextFile.Addr(),
-			handler,
+			handle,
 			uintptr(unsafe.Pointer(&data)),
 		)
 		if result == 0 {

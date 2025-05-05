@@ -8,17 +8,17 @@ import (
 // FileInfo defines a custom fs.FileInfo implementation for wrapping the results
 // from the file info system calls.
 type FileInfo struct {
-	name    string
-	isDir   bool
-	size    int64
 	modTime time.Time
+	name    string
+	size    uint64
+	isDir   bool
 }
 
 func (fi FileInfo) Name() string {
 	return fi.name
 }
 
-func (fi FileInfo) Size() int64 {
+func (fi FileInfo) Size() uint64 {
 	return fi.size
 }
 

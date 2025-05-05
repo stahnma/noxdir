@@ -1,6 +1,6 @@
 package main
 
-import "dirsize/drive"
+import "github.com/crumbyte/noxdir/drive"
 
 type Column struct {
 	Title   string

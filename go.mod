@@ -1,4 +1,4 @@
-module dirsize
+module github.com/crumbyte/noxdir
 
 go 1.24
 

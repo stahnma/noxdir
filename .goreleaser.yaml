@@ -1,11 +1,14 @@
 version: 2
+project_name: noxdir
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - env:
+  - id: noxdir
+    binary: noxdir
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -13,7 +16,7 @@ builds:
       - darwin
 
 archives:
-  - formats: [tar.gz]
+  - formats: [ tar.gz ]
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -23,18 +26,18 @@ archives:
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
-        formats: [zip]
+        formats: [ zip ]
 
 changelog:
   sort: asc
   filters:
     exclude:
+      - "README.MD"
       - "^docs:"
       - "^test:"
 
 release:
-  footer: >-
-
-    ---
-
-    Released by [GoReleaser](https://github.com/goreleaser/goreleaser).
+  github:
+    owner: crumbyte
+    name: noxdir
+  name_template: "{{.ProjectName}}-v{{.Version}}"

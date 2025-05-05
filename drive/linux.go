@@ -81,7 +81,7 @@ func NewFileInfo(name string, data *unix.Stat_t) FileInfo {
 		name:    name,
 		isDir:   data.Mode&unix.S_IFMT == unix.S_IFDIR,
 		size:    data.Size,
-		modTime: time.Unix(data.Mtim.Sec, data.Mtim.Nsec),
+		modTime: time.Unix(int64(data.Mtim.Sec), int64(data.Mtim.Nsec)),
 	}
 }
 

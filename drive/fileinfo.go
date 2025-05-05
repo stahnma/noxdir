@@ -10,7 +10,7 @@ import (
 type FileInfo struct {
 	modTime time.Time
 	name    string
-	size    uint64
+	size    int64
 	isDir   bool
 }
 
@@ -18,7 +18,7 @@ func (fi FileInfo) Name() string {
 	return fi.name
 }
 
-func (fi FileInfo) Size() uint64 {
+func (fi FileInfo) Size() int64 {
 	return fi.size
 }
 

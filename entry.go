@@ -40,12 +40,12 @@ type Entry struct {
 
 	// Child contains a list of all child instances including both files and
 	// directories. If the current Entry instance represents a file, this
-	// property will always be a nil.
+	// property will always be nil.
 	Child []*Entry
 	mx    sync.RWMutex
 
 	// Size contains a total tail in bytes including sizes of all child entries.
-	Size uint64
+	Size int64
 
 	// Dirs contain the number of directories within the current entry. This
 	// property will always be zero if the current instance represents a file.
@@ -80,7 +80,7 @@ func NewDirEntry(path string, modTime time.Time) *Entry {
 	}
 }
 
-func NewFileEntry(path string, size uint64, modTime time.Time) *Entry {
+func NewFileEntry(path string, size int64, modTime time.Time) *Entry {
 	return &Entry{
 		Path:    path,
 		Name:    filepath.Base(path),
@@ -131,9 +131,9 @@ func (e *Entry) AddChild(child *Entry) {
 // CalculateSize calculates the total number of directories and files, including
 // ones within child entries, and the total tail of the current entry instance.
 // This function call will recursively calculate the sizes of child entries. The
-// final [Entry.Size] field will be a sum of the sizes of all nested files. If
-// the current entry represents a file, only its own tail will be returned.
-func (e *Entry) CalculateSize() uint64 {
+// final [Entry.Size] field will be a sum of all nested files sizes. If the
+// current entry represents a file, only its own tail will be returned.
+func (e *Entry) CalculateSize() int64 {
 	if e.calculateSizeSem.Swap(true) || !e.IsDir {
 		return e.Size
 	}

@@ -23,7 +23,7 @@ var excludedVolumes = map[string]struct{}{
 }
 
 var excludedPaths = map[string]map[string]struct{}{
-	"/System/Volumes/Data/": {
+	"/System/Volumes/Data": {
 		"Volumes": {},
 	},
 }
@@ -55,13 +55,13 @@ func NewList() (*List, error) {
 func mntList() ([]unix.Statfs_t, error) {
 	count, err := unix.Getfsstat(nil, unix.MNT_NOWAIT)
 	if err != nil {
-		return nil, fmt.Errorf("error getting fsstat: %v", err)
+		return nil, fmt.Errorf("error getting fsstat: %w", err)
 	}
 
 	fs := make([]unix.Statfs_t, count)
 
 	if _, err = unix.Getfsstat(fs, unix.MNT_NOWAIT); err != nil {
-		return nil, fmt.Errorf("error getting fsstat: %v", err)
+		return nil, fmt.Errorf("error getting fsstat: %w", err)
 	}
 
 	return fs, nil
@@ -101,11 +101,9 @@ func ReadDir(path string) ([]FileInfo, error) {
 		excludedChild, excluded := excludedPaths[path]
 
 		if child.IsDir() && excluded {
-			if _, childExcluded := excludedChild[child]; childExcluded {
-				offset += int(dirent.Reclen)
+			if _, childExcluded := excludedChild[child.Name()]; childExcluded {
 				continue
 			}
-
 		}
 
 		fis = append(
@@ -130,7 +128,7 @@ func Explore(path string) error {
 	cmd := exec.Command("open", path)
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("error starting open: %v", err)
+		return fmt.Errorf("error starting open: %w", err)
 	}
 
 	go func() {
@@ -141,7 +139,7 @@ func Explore(path string) error {
 }
 
 func bytePtrToString(b []byte) string {
-	for n := 0; n < len(b); n++ {
+	for n := range b {
 		if b[n] == 0 {
 			return string(b[:n])
 		}

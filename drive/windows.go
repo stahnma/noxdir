@@ -52,7 +52,7 @@ func NewFileInfo(data *win32finddata1) FileInfo {
 	return FileInfo{
 		name:    syscall.UTF16ToString(data.FileName[:]),
 		isDir:   data.FileAttributes&16 != 0,
-		size:    uint64(data.FileSizeHigh)<<32 + uint64(data.FileSizeLow),
+		size:    int64(data.FileSizeHigh)<<32 + int64(data.FileSizeLow),
 		modTime: time.Unix(0, data.LastWriteTime.Nanoseconds()),
 	}
 }

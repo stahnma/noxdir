@@ -57,9 +57,10 @@ func (n *Navigation) Unlock() {
 	n.locked.Swap(false)
 }
 
-func (n *Navigation) ParentSize() uint64 {
+func (n *Navigation) ParentSize() int64 {
 	if n.entry == nil {
-		return n.currentDrive.UsedBytes
+		//nolint:gosec // why not, let's overflow
+		return int64(n.currentDrive.UsedBytes)
 	}
 
 	return n.entry.Size

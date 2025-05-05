@@ -241,7 +241,7 @@ linters:
         - github.com\/charmbracelet\/bubbletea\.Model
 
   exclusions:
-    warn-unused: true
+    warn-unused: false
     presets:
       - std-error-handling
       - common-false-positives

@@ -82,7 +82,7 @@ func NewFileInfo(name string, data *unix.Stat_t) FileInfo {
 		name:    name,
 		isDir:   data.Mode&unix.S_IFMT == unix.S_IFDIR,
 		size:    data.Size,
-		modTime: time.Unix(data.Mtim.Sec, data.Mtim.Nsec),
+		modTime: time.Unix(int64(data.Mtim.Sec), int64(data.Mtim.Nsec)),
 	}
 }
 
@@ -94,7 +94,7 @@ func mntInfo(path string) (*Info, bool, error) {
 	}
 
 	// use an implicitly defined list of excluded FS types rather than names map
-	if _, ok := excludedFSTypes[stat.Type]; ok || stat.Blocks == 0 {
+	if _, ok := excludedFSTypes[int64(stat.Type)]; ok || stat.Blocks == 0 {
 		return nil, true, nil
 	}
 
@@ -105,7 +105,7 @@ func mntInfo(path string) (*Info, bool, error) {
 
 	info := &Info{
 		Path:        path,
-		FSName:      fsTypesMap[stat.Type],
+		FSName:      fsTypesMap[int64(stat.Type)],
 		TotalBytes:  stat.Blocks * blockSize,
 		FreeBytes:   stat.Bfree * blockSize,
 		UsedBytes:   usedBlocks * blockSize,

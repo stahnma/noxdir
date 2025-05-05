@@ -27,22 +27,22 @@ and where to clean up first.
 
 ### Download Binaries
 
-Grab the latest binary from
-the [Releases](https://github.com/yourname/disksweep/releases) page for your
-platform.
+Grab the latest binary from the [Releases](https://github.com/crumbyte/noxdir/releases) page for your
+platform. Run it from wherever you want.
 
-### Or build from source (Go 1.18+)
+### Or build from source (Go 1.24+)
 
 ```bash
-git clone https://github.com/yourname/disksweep.git
-cd disksweep
-go build -o disksweep
-./disksweep
+git clone https://github.com/crumbyte/noxdir.git
+cd noxdir
+make build
+
+./noxdir
 ```
 
 ## 🛠 Usage
 
-Just run:
+Just run in the terminal:
 
 ```bash
 noxdir
@@ -61,23 +61,25 @@ No flags, no fuss. It starts the interactive UI immediately.
 
 - [ ] Listen for FS event for rendering
 - [ ] Dirs/files management (delete, rename, add, etc.)
-- [ ] Sort directories by usage, free space, etc. (it is already done dor
+- [ ] Sort directories by usage, free space, etc. (already done for
   drives)
 - [ ] Theming / color customization
 
 ## 🙋 FAQ
 
-**Q:** Can I use this in scripts or headless environments?  
-**A:** Not yet — it's designed for interactive use.
+- **Q:** Can I use this in scripts or headless environments?
+- **A:** Not yet — it's designed for interactive use.
 
-**Q:** Is this safe to run?
-**A:** Yes — it’s strictly read-only and does not touch any files.
 
-**Q:** Can I delete dirs/files from the application?
-**A:** Not yet. Already in the roadmap.
+- **Q:** Is this safe to run?
+- **A:** Yes — it’s strictly read-only and does not touch any files.
 
-**Q:** I don't see the icons and everything looks ugly.
-**A:** It depends solely on your terminal's settings and fonts. Theming your
+
+- **Q:** Can I delete dirs/files from the application?
+- **A:** Not yet. Already in the roadmap.
+
+- **Q:** I don't see the icons and everything looks ugly.
+- **A:** It depends solely on your terminal's settings and fonts. Theming your
 terminal application is another topic.
 
 ## 🧪 Contributing
@@ -87,9 +89,9 @@ open an issue first to discuss.
 
 ## 📝 License
 
-MIT © [Your Name](https://github.com/yourname)
+MIT © [crumbyte](https://github.com/crumbyte)
 
 ---
 
-> DiskSweep is built with 💻 and ❤️ to help you take back control of your
+> NoxDir is built with 💻 and ❤️ to help you take back control of your
 > storage.

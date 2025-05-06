@@ -1,17 +1,21 @@
 # 🧹 NoxDir
 
-**NoxDir** is a fast, cross-platform CLI tool for scanning your file system.
-It detects mounted drives or volumes and displays space usage in a clean,
-interactive terminal UI. Ideal for figuring out what’s eating up your disk space
-and where to clean up first.
+**NoxDir** is a high-performance, cross-platform command-line tool for
+visualizing and exploring your file system usage. It detects mounted drives or
+volumes and presents disk usage metrics through a responsive, keyboard-driven
+terminal UI. Designed to help you quickly locate space hogs and streamline your
+cleanup workflow.
 
 ## 🚀 Features
 
-- ✅ Detects drives/mount points on **Windows**, **macOS**, and **Linux**
-- 📊 Shows disk usage (used, free, total, percentage usage) per drive
-- 🖥️ Interactive terminal UI (keyboard navigation)
-- ⚡ Fast and efficient scanning, using native system calls
-- 🔒 No telemetry, no BS — just your drives and the data
+- ✅ Cross-platform drive and mount point detection (**Windows**, **macOS**, *
+  *Linux**)
+- 📊 Real-time disk usage insights: used, free, total capacity, and utilization
+  percentage
+- 🖥️ Interactive and intuitive terminal interface with keyboard navigation
+- ⚡ Built for speed — uses native system calls for maximum performance
+- 🔒 Fully local and privacy-respecting — **no telemetry**, ever
+- 🧰 Minimal dependencies — single binary, portable
 
 ## 📸 Preview
 
@@ -25,10 +29,11 @@ and where to clean up first.
 
 ## 📦 Installation
 
-### Download Binaries
+### Pre-compiled Binaries
 
-Grab the latest binary from the [Releases](https://github.com/crumbyte/noxdir/releases) page for your
-platform. Run it from wherever you want.
+Obtain the latest optimized binary from
+the [Releases](https://github.com/crumbyte/noxdir/releases) repository. The
+application is self-contained and requires no installation process.
 
 ### Or build from source (Go 1.24+)
 
@@ -37,7 +42,7 @@ git clone https://github.com/crumbyte/noxdir.git
 cd noxdir
 make build
 
-./noxdir
+./bin/noxdir
 ```
 
 ## 🛠 Usage
@@ -48,7 +53,7 @@ Just run in the terminal:
 noxdir
 ```
 
-No flags, no fuss. It starts the interactive UI immediately.
+The interactive interface initializes immediately without configuration requirements.
 
 ## ⚙️ How It Works
 
@@ -59,28 +64,32 @@ No flags, no fuss. It starts the interactive UI immediately.
 
 ## 🧩 Planned Features
 
-- [ ] Listen for FS event for rendering
-- [ ] Dirs/files management (delete, rename, add, etc.)
+- [ ] Real-time filesystem event monitoring and interface updates
+- [ ] Exportable reports in various formats (JSON, CSV, HTML)
+- [ ] Comprehensive file management capabilities (deletion, renaming, creation operations)
 - [ ] Sort directories by usage, free space, etc. (already done for
   drives)
-- [ ] Theming / color customization
+- [ ] Customizable interface aesthetics with theme support
 
 ## 🙋 FAQ
 
 - **Q:** Can I use this in scripts or headless environments?
 - **A:** Not yet — it's designed for interactive use.
-
-
-- **Q:** Is this safe to run?
-- **A:** Yes — it’s strictly read-only and does not touch any files.
-
-
-- **Q:** Can I delete dirs/files from the application?
-- **A:** Not yet. Already in the roadmap.
-
-- **Q:** I don't see the icons and everything looks ugly.
-- **A:** It depends solely on your terminal's settings and fonts. Theming your
-terminal application is another topic.
+  <br><br>
+- **Q:** What are the security implications of running NoxDir?
+- **A:** NoxDir operates in a strictly read-only capacity with no file
+  modification capabilities in the current release.
+  <br><br>
+- Q: Does NoxDir support file management operations?
+- A: File manipulation features are currently under development and prioritized
+  in our roadmap.
+  <br><br>
+- **Q:** The interface appears to have rendering issues with icons or
+  formatting.
+- **A:** Visual presentation depends on terminal capabilities and font
+  configuration. For optimal experience, a terminal with Unicode and glyph
+  support is recommended.
+  <br><br>
 
 ## 🧪 Contributing
 
@@ -92,6 +101,3 @@ open an issue first to discuss.
 MIT © [crumbyte](https://github.com/crumbyte)
 
 ---
-
-> NoxDir is built with 💻 and ❤️ to help you take back control of your
-> storage.

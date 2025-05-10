@@ -56,7 +56,9 @@ func (dm *DriveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return dm, nil
 	case tea.KeyMsg:
-		switch bindingKey(msg.String()) {
+		bk := bindingKey(strings.ToLower(msg.String()))
+
+		switch bk {
 		case sortTotalCap, sortTotalUsed, sortTotalFree, sortTotalUsedP:
 			dm.sortDrives(
 				drive.SortKey(strings.TrimPrefix(msg.String(), "alt+")),

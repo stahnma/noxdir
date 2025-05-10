@@ -74,8 +74,8 @@ func TestEntry_Traverse(t *testing.T) {
 	require.NoError(t, e.Traverse())
 	e.CalculateSize()
 
-	require.Equal(t, uint64(4), e.Dirs)
-	require.Equal(t, uint64(3), e.Files)
+	require.Equal(t, uint64(4), e.LocalDirs)
+	require.Equal(t, uint64(3), e.LocalFiles)
 
 	require.Equal(t, uint64(21), e.TotalFiles)
 	require.Equal(t, uint64(9), e.TotalDirs)
@@ -106,8 +106,8 @@ func TestEntry_TraverseAsync(t *testing.T) {
 
 	e.CalculateSize()
 
-	require.Equal(t, uint64(4), e.Dirs)
-	require.Equal(t, uint64(3), e.Files)
+	require.Equal(t, uint64(4), e.LocalDirs)
+	require.Equal(t, uint64(3), e.LocalFiles)
 
 	require.Equal(t, uint64(21), e.TotalFiles)
 	require.Equal(t, uint64(9), e.TotalDirs)
@@ -151,8 +151,8 @@ func TestEntry_AddChild(t *testing.T) {
 	}
 
 	require.Len(t, e.Child, 6)
-	require.EqualValues(t, 3, e.Dirs)
-	require.EqualValues(t, 3, e.Files)
+	require.EqualValues(t, 3, e.LocalDirs)
+	require.EqualValues(t, 3, e.LocalFiles)
 	require.EqualValues(t, 3, e.TotalFiles)
 	require.EqualValues(t, 3, e.TotalDirs)
 }
@@ -160,13 +160,13 @@ func TestEntry_AddChild(t *testing.T) {
 func verifyEntryStructure(t *testing.T, e *Entry, te *testEntry) {
 	t.Helper()
 
-	require.Equal(t, te.name, e.Name)
+	require.Equal(t, te.name, e.Name())
 
 	for i := range te.files {
 		c := e.GetChild(te.files[i])
 
 		require.NotNil(t, c, "child %s not found", te.files[i])
-		require.Equal(t, te.files[i], c.Name)
+		require.Equal(t, te.files[i], c.Name())
 	}
 
 	for i := range te.dirs {

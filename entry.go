@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"cmp"
 	"container/heap"
 	"errors"
+	"os"
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -32,9 +35,6 @@ type Entry struct {
 	// instance of the entry.
 	Path string
 
-	// Name contains the last part of the Path property.
-	Name string
-
 	// ModTime contains the last modification time of the entry.
 	ModTime time.Time
 
@@ -42,18 +42,19 @@ type Entry struct {
 	// directories. If the current Entry instance represents a file, this
 	// property will always be nil.
 	Child []*Entry
-	mx    sync.RWMutex
+
+	mx sync.RWMutex
 
 	// Size contains a total tail in bytes including sizes of all child entries.
 	Size int64
 
-	// Dirs contain the number of directories within the current entry. This
+	// LocalDirs contain the number of directories within the current entry. This
 	// property will always be zero if the current instance represents a file.
-	Dirs uint64
+	LocalDirs uint64
 
-	// Files contain the number of files within the current entry. This property
+	// LocalFiles contain the number of files within the current entry. This property
 	// will always be zero if the current instance represents a file.
-	Files uint64
+	LocalFiles uint64
 
 	// TotalDirs contains the total number of directories within the current
 	// entry, including directories within the child entries. This property will
@@ -66,14 +67,14 @@ type Entry struct {
 	TotalFiles uint64
 
 	// IsDir defines whether the current instance represents a dir or a file.
-	IsDir            bool
-	calculateSizeSem atomic.Bool
+	IsDir bool
+
+	calculateSizeSem uint32
 }
 
 func NewDirEntry(path string, modTime time.Time) *Entry {
 	return &Entry{
 		Path:    path,
-		Name:    filepath.Base(path),
 		Child:   make([]*Entry, 0),
 		IsDir:   true,
 		ModTime: modTime,
@@ -83,10 +84,27 @@ func NewDirEntry(path string, modTime time.Time) *Entry {
 func NewFileEntry(path string, size int64, modTime time.Time) *Entry {
 	return &Entry{
 		Path:    path,
-		Name:    filepath.Base(path),
 		Size:    size,
 		ModTime: modTime,
 	}
+}
+
+func (e *Entry) Name() string {
+	li := bytes.LastIndex([]byte(e.Path), []byte{os.PathSeparator})
+	if li == -1 {
+		return e.Path
+	}
+
+	return e.Path[li+1:]
+}
+
+func (e *Entry) Ext() string {
+	li := bytes.LastIndex([]byte(e.Path), []byte{'.'})
+	if li == -1 {
+		return e.Path
+	}
+
+	return strings.ToLower(e.Path[li+1:])
 }
 
 // GetChild tries to find a child element by its name. The search will be done
@@ -114,18 +132,18 @@ func (e *Entry) AddChild(child *Entry) {
 	defer e.mx.Unlock()
 
 	if e.Child == nil {
-		e.Child = make([]*Entry, 0, 1)
+		e.Child = make([]*Entry, 0, 10)
 	}
 
 	e.Child = append(e.Child, child)
 
 	if child.IsDir {
-		e.TotalDirs, e.Dirs = e.TotalDirs+1, e.Dirs+1
+		e.TotalDirs, e.LocalDirs = e.TotalDirs+1, e.LocalDirs+1
 
 		return
 	}
 
-	e.TotalFiles, e.Files = e.TotalFiles+1, e.Files+1
+	e.TotalFiles, e.LocalFiles = e.TotalFiles+1, e.LocalFiles+1
 }
 
 // CalculateSize calculates the total number of directories and files, including
@@ -134,11 +152,11 @@ func (e *Entry) AddChild(child *Entry) {
 // final [Entry.Size] field will be a sum of all nested files sizes. If the
 // current entry represents a file, only its own tail will be returned.
 func (e *Entry) CalculateSize() int64 {
-	if e.calculateSizeSem.Swap(true) || !e.IsDir {
+	if atomic.SwapUint32(&e.calculateSizeSem, 1) == 1 || !e.IsDir {
 		return e.Size
 	}
 
-	defer e.calculateSizeSem.Swap(false)
+	defer atomic.SwapUint32(&e.calculateSizeSem, 0)
 
 	e.TotalDirs, e.Size, e.TotalFiles = 0, 0, 0
 

@@ -79,7 +79,9 @@ func (dm *DirModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		dm.updateSize(msg.Width, msg.Height)
 	case tea.KeyMsg:
-		switch bindingKey(msg.String()) {
+		bk := bindingKey(strings.ToLower(msg.String()))
+
+		switch bk {
 		case explore:
 			if dm.nav.State() == Drives {
 				return dm, nil
@@ -177,18 +179,19 @@ func (dm *DirModel) updateTableData() {
 		parentUsage := float64(child.Size) / float64(dm.nav.ParentSize())
 
 		pgBar := fillProgress.ViewAs(parentUsage)
+		name := child.Name()
 
-		name := lipgloss.NewStyle().MaxWidth(nameWidth - 5).Render(child.Name)
+		fmtName := lipgloss.NewStyle().MaxWidth(nameWidth - 5).Render(name)
 		if lipgloss.Width(name) == nameWidth-5 {
-			name += "..."
+			fmtName += "..."
 		}
 
 		rows = append(
 			rows,
 			table.Row{
-				entryIcon(child),
-				child.Name,
+				EntryIcon(child),
 				name,
+				fmtName,
 				fmtSize(child.Size, true),
 				totalDirs,
 				totalFiles,
@@ -219,9 +222,9 @@ func (dm *DirModel) dirsSummary() string {
 		statusStyle.Render("SIZE"),
 		statusBarStyle.PaddingRight(1).Render(fmtSize(dm.nav.Entry().Size, false)),
 		statusStyle.Render("DIRS"),
-		unitFmt(dm.nav.Entry().Dirs),
+		unitFmt(dm.nav.Entry().LocalDirs),
 		statusStyle.Render("FILES"),
-		unitFmt(dm.nav.Entry().Files),
+		unitFmt(dm.nav.Entry().LocalFiles),
 		errorStyle.Render("ERRORS"),
 		unitFmt(uint64(len(dm.lastErr))),
 	}
@@ -270,13 +273,13 @@ func (dm *DirModel) fillTopFiles() {
 
 		path := strings.TrimSuffix(
 			strings.TrimPrefix(file.Path, dm.nav.currentDrive.Path),
-			file.Name,
+			file.Name(),
 		)
 
 		rows[i] = table.Row{
-			entryIcon(file),
+			EntryIcon(file),
 			file.Path,
-			path + topFileStyle.Render(file.Name),
+			path + topFileStyle.Render(file.Name()),
 			fmtSize(file.Size, true),
 			file.ModTime.Format("2006-01-02 15:04"),
 		}
@@ -294,20 +297,4 @@ func (dm *DirModel) updateSize(width, height int) {
 
 	dm.updateTableData()
 	dm.fillTopFiles()
-}
-
-func entryIcon(e *Entry) string {
-	icon := "📄"
-
-	if !e.IsDir {
-		return icon
-	}
-
-	icon = "📂"
-
-	if !e.HasChild() {
-		icon = "📁"
-	}
-
-	return icon
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/crumbyte/noxdir/drive"
@@ -52,7 +53,9 @@ func (vm *ViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		vm.width = msg.Width
 	case tea.KeyMsg:
-		switch bindingKey(msg.String()) {
+		bk := bindingKey(strings.ToLower(msg.String()))
+
+		switch bk {
 		case quit, cancel:
 			return vm, tea.Quit
 		case enter:

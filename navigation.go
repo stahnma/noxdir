@@ -2,7 +2,6 @@ package main
 
 import (
 	"sync/atomic"
-	"time"
 
 	"github.com/crumbyte/noxdir/drive"
 )
@@ -89,7 +88,7 @@ func (n *Navigation) LevelDown(path string, clh ChangeLevelHandler) (chan struct
 	if n.state == Drives {
 		n.state = Dirs
 
-		n.entry = NewDirEntry(path, time.Now())
+		n.entry = NewDirEntry(path, 0)
 		n.currentDrive = n.drives.DriveInfo(path)
 
 		return n.entry.TraverseAsync()

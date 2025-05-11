@@ -33,28 +33,28 @@ var drivesKeyMap = [][]key.Binding{
 			),
 			key.WithHelp(
 				"alt+(t/f/u/g)",
-				"sort total/free/used/usage",
+				"\U000F04BA sort total/free/used/usage",
 			),
 		),
 		key.NewBinding(
 			key.WithKeys(enter.String()),
 			key.WithHelp(
 				enter.String(),
-				"open drive",
+				"\U000F17A3 open drive",
 			),
 		),
 		key.NewBinding(
 			key.WithKeys(explore.String()),
 			key.WithHelp(
 				explore.String(),
-				"explore drive",
+				"\uF115 explore drive",
 			),
 		),
 		key.NewBinding(
 			key.WithKeys(quit.String(), cancel.String()),
 			key.WithHelp(
 				quit.String()+"/"+cancel.String(),
-				"quit",
+				"\U000F0206 quit",
 			),
 		),
 	},
@@ -66,44 +66,37 @@ var dirsKeyMap = [][]key.Binding{
 			key.WithKeys(enter.String()),
 			key.WithHelp(
 				enter.String(),
-				"open dir",
+				"\U000F17A3 open dir",
 			),
 		),
 		key.NewBinding(
 			key.WithKeys(backspace.String()),
 			key.WithHelp(
 				backspace.String(),
-				"back",
-			),
-		),
-		key.NewBinding(
-			key.WithKeys(sort.String()),
-			key.WithHelp(
-				sort.String(),
-				"Sort asc/desc",
+				"\U000F17A7 back",
 			),
 		),
 		key.NewBinding(
 			key.WithKeys(explore.String()),
 			key.WithHelp(
 				explore.String(),
-				"explore dir/file",
+				"\uF115 explore dir/file",
+			),
+		),
+		key.NewBinding(
+			key.WithKeys(quit.String(), cancel.String()),
+			key.WithHelp(
+				quit.String()+"/"+cancel.String(),
+				"\U000F0206 quit",
 			),
 		),
 	},
 	{
 		key.NewBinding(
-			key.WithKeys(quit.String(), cancel.String()),
-			key.WithHelp(
-				quit.String()+"/"+cancel.String(),
-				"quit",
-			),
-		),
-		key.NewBinding(
 			key.WithKeys(toggleTopFiles.String()),
 			key.WithHelp(
 				toggleTopFiles.String(),
-				"show/hide top files",
+				"\U000F028B toggle top files",
 			),
 		),
 	},

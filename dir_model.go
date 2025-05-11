@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -195,7 +196,7 @@ func (dm *DirModel) updateTableData() {
 				fmtSize(child.Size, true),
 				totalDirs,
 				totalFiles,
-				child.ModTime.Format("2006-01-02 15:04"),
+				time.Unix(child.ModTime, 0).Format("2006-01-02 15:04"),
 				strconv.FormatFloat(parentUsage*100, 'f', 2, 64) + " %",
 				pgBar,
 			},
@@ -217,16 +218,15 @@ func (dm *DirModel) dirsSummary() string {
 	statuses := []string{
 		statusStyle.Render("PATH"),
 		"",
-		stateStyle.Render("STATE"),
-		statusText.Padding(0, 1, 0, 1).Render(state),
+		stateStyle.Render(state),
 		statusStyle.Render("SIZE"),
-		statusBarStyle.PaddingRight(1).Render(fmtSize(dm.nav.Entry().Size, false)),
+		statusText.Render(fmtSize(dm.nav.Entry().Size, false)),
 		statusStyle.Render("DIRS"),
-		unitFmt(dm.nav.Entry().LocalDirs),
+		statusText.Render(unitFmt(dm.nav.Entry().LocalDirs)),
 		statusStyle.Render("FILES"),
-		unitFmt(dm.nav.Entry().LocalFiles),
+		statusText.Render(unitFmt(dm.nav.Entry().LocalFiles)),
 		errorStyle.Render("ERRORS"),
-		unitFmt(uint64(len(dm.lastErr))),
+		statusText.Render(unitFmt(uint64(len(dm.lastErr)))),
 	}
 
 	pathValWidth := dm.width
@@ -281,7 +281,7 @@ func (dm *DirModel) fillTopFiles() {
 			file.Path,
 			path + topFileStyle.Render(file.Name()),
 			fmtSize(file.Size, true),
-			file.ModTime.Format("2006-01-02 15:04"),
+			time.Unix(file.ModTime, 0).Format("2006-01-02 15:04"),
 		}
 	}
 

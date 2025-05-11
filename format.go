@@ -30,13 +30,5 @@ func fmtSize[T numeric](bytesSize T, fmtWidth bool) string {
 }
 
 func unitFmt(val uint64) string {
-	return statusBarStyle.PaddingRight(1).Render(
-		strconv.FormatUint(val, 10),
-	)
-}
-
-func capFmt(val uint64) string {
-	return statusBarStyle.PaddingRight(1).Render(
-		fmtSize(val, false),
-	)
+	return strconv.FormatUint(val, 10)
 }

@@ -112,7 +112,7 @@ func ReadDir(path string) ([]FileInfo, error) {
 				name:    child.Name(),
 				isDir:   child.IsDir(),
 				size:    child.Size(),
-				modTime: child.ModTime(),
+				modTime: child.ModTime().Unix(),
 			},
 		)
 	}

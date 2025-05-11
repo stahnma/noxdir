@@ -154,7 +154,7 @@ func (dm *DriveModel) drivesSummary() string {
 
 	modeKey := statusStyle.Render("MODE")
 	capacityKey := statusStyle.Render("CAPACITY")
-	totalCapacity := capFmt(dl.TotalCapacity)
+	totalCapacity := statusText.Render(fmtSize(dl.TotalCapacity, false))
 
 	statusVal := statusText.Width(
 		dm.width - (w(modeKey) * 3) - w(capacityKey) - (w(totalCapacity) * 3),
@@ -170,9 +170,9 @@ func (dm *DriveModel) drivesSummary() string {
 				capacityKey,
 				totalCapacity,
 				statusStyle.Render("FREE"),
-				capFmt(dl.TotalFree),
+				statusText.Render(fmtSize(dl.TotalFree, false)),
 				statusStyle.Render("USED"),
-				capFmt(dl.TotalUsed),
+				statusText.Render(fmtSize(dl.TotalUsed, false)),
 			),
 		)
 }

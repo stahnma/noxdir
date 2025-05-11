@@ -35,15 +35,15 @@ type Entry struct {
 	// instance of the entry.
 	Path string
 
-	// ModTime contains the last modification time of the entry.
-	ModTime time.Time
-
 	// Child contains a list of all child instances including both files and
 	// directories. If the current Entry instance represents a file, this
 	// property will always be nil.
 	Child []*Entry
 
 	mx sync.RWMutex
+
+	// ModTime contains the last modification time of the entry.
+	ModTime int64
 
 	// Size contains a total tail in bytes including sizes of all child entries.
 	Size int64
@@ -72,7 +72,7 @@ type Entry struct {
 	calculateSizeSem uint32
 }
 
-func NewDirEntry(path string, modTime time.Time) *Entry {
+func NewDirEntry(path string, modTime int64) *Entry {
 	return &Entry{
 		Path:    path,
 		Child:   make([]*Entry, 0),
@@ -81,7 +81,7 @@ func NewDirEntry(path string, modTime time.Time) *Entry {
 	}
 }
 
-func NewFileEntry(path string, size int64, modTime time.Time) *Entry {
+func NewFileEntry(path string, size int64, modTime int64) *Entry {
 	return &Entry{
 		Path:    path,
 		Size:    size,

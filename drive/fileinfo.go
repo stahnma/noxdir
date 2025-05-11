@@ -2,14 +2,13 @@ package drive
 
 import (
 	"os"
-	"time"
 )
 
 // FileInfo defines a custom fs.FileInfo implementation for wrapping the results
 // from the file info system calls.
 type FileInfo struct {
-	modTime time.Time
 	name    string
+	modTime int64
 	size    int64
 	isDir   bool
 }
@@ -28,7 +27,7 @@ func (fi FileInfo) Mode() os.FileMode {
 	panic("os.FileMode not supported")
 }
 
-func (fi FileInfo) ModTime() time.Time {
+func (fi FileInfo) ModTime() int64 {
 	return fi.modTime
 }
 

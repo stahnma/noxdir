@@ -69,7 +69,7 @@ func TestEntry_Traverse(t *testing.T) {
 
 	entryRoot := initTmpEntry(t, &testEntryInstance, root)
 
-	e := NewDirEntry(entryRoot, time.Now())
+	e := NewDirEntry(entryRoot, 0)
 
 	require.NoError(t, e.Traverse())
 	e.CalculateSize()
@@ -91,7 +91,7 @@ func TestEntry_TraverseAsync(t *testing.T) {
 
 	entryRoot := initTmpEntry(t, &testEntryInstance, root)
 
-	e := NewDirEntry(entryRoot, time.Now())
+	e := NewDirEntry(entryRoot, 0)
 
 	done, errCh := e.TraverseAsync()
 
@@ -118,7 +118,7 @@ func TestEntry_TraverseAsync(t *testing.T) {
 }
 
 func TestEntry_AddChild(t *testing.T) {
-	e := NewDirEntry("root", time.Now())
+	e := NewDirEntry("root", 0)
 
 	require.False(t, e.HasChild())
 
@@ -139,10 +139,10 @@ func TestEntry_AddChild(t *testing.T) {
 	for i := range tableData {
 		path := "root" + string(os.PathSeparator) + tableData[i].name
 
-		childEntry := NewFileEntry(path, 1, time.Now())
+		childEntry := NewFileEntry(path, 1, 0)
 
 		if tableData[i].isDir {
-			childEntry = NewDirEntry(path, time.Now())
+			childEntry = NewDirEntry(path, 0)
 		}
 
 		e.AddChild(childEntry)

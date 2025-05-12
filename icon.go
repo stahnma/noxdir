@@ -20,7 +20,7 @@ func EntryIcon(e *Entry) string {
 		icon = "💻"
 	case "jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff":
 		icon = "🖼️"
-	case "mp4", "mkv", "avi", "mov", "webm", "m4v":
+	case "mp4", "mkv", "avi", "mov", "webm", "m4v", "wmv":
 		icon = "🎞️"
 	case "json", "csv", "xml", "env", "yml", "yaml", "ini":
 		icon = "🔧"

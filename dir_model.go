@@ -208,38 +208,28 @@ func (dm *DirModel) updateTableData() {
 }
 
 func (dm *DirModel) dirsSummary() string {
-	w := lipgloss.Width
-
 	state := "READY"
+
 	if dm.nav.Locked() {
 		state = "PENDING"
 	}
 
-	statuses := []string{
-		statusStyle.Render("PATH"),
-		"",
-		stateStyle.Render(state),
-		statusStyle.Render("SIZE"),
-		statusText.Render(fmtSize(dm.nav.Entry().Size, false)),
-		statusStyle.Render("DIRS"),
-		statusText.Render(unitFmt(dm.nav.Entry().LocalDirs)),
-		statusStyle.Render("FILES"),
-		statusText.Render(unitFmt(dm.nav.Entry().LocalFiles)),
-		errorStyle.Render("ERRORS"),
-		statusText.Render(unitFmt(uint64(len(dm.lastErr)))),
+	items := []*BarItem{
+		NewBarItem("PATH", "#FF5F87", 0),
+		NewBarItem(dm.nav.Entry().Path, "", -1),
+		NewBarItem(state, "#FF8531", 0),
+		NewBarItem("SIZE", "#FF5F87", 0),
+		DefaultBarItem(fmtSize(dm.nav.Entry().Size, false)),
+		NewBarItem("DIRS", "#FF5F87", 0),
+		DefaultBarItem(unitFmt(dm.nav.Entry().LocalDirs)),
+		NewBarItem("FILES", "#FF5F87", 0),
+		DefaultBarItem(unitFmt(dm.nav.Entry().LocalFiles)),
+		NewBarItem("ERRORS", "#FF303E", 0),
+		DefaultBarItem(unitFmt(uint64(len(dm.lastErr)))),
 	}
 
-	pathValWidth := dm.width
-
-	for i := range statuses {
-		pathValWidth -= w(statuses[i])
-	}
-
-	statuses[1] = statusText.Width(pathValWidth).Render(dm.nav.Entry().Path)
-
-	return statusBarStyle.
-		Margin(1, 0, 1, 0).
-		Render(lipgloss.JoinHorizontal(lipgloss.Top, statuses...))
+	return statusBarStyle.Margin(1, 0, 1, 0).
+		Render(NewStatusBar(items, dm.width))
 }
 
 func (dm *DirModel) fillTopFiles() {

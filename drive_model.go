@@ -150,31 +150,21 @@ func (dm *DriveModel) updateTableData(key drive.SortKey, sortDesc bool) {
 }
 
 func (dm *DriveModel) drivesSummary() string {
-	w, dl := lipgloss.Width, dm.nav.DrivesList()
+	dl := dm.nav.DrivesList()
 
-	modeKey := statusStyle.Render("MODE")
-	capacityKey := statusStyle.Render("CAPACITY")
-	totalCapacity := statusText.Render(fmtSize(dl.TotalCapacity, false))
+	items := []*BarItem{
+		NewBarItem("MODE", "#FF5F87", 0),
+		NewBarItem("Drives List", "", -1),
+		NewBarItem("CAPACITY", "#FF5F87", 0),
+		DefaultBarItem(fmtSize(dl.TotalCapacity, false)),
+		NewBarItem("FREE", "#FF5F87", 0),
+		DefaultBarItem(fmtSize(dl.TotalFree, false)),
+		NewBarItem("USED", "#FF5F87", 0),
+		DefaultBarItem(fmtSize(dl.TotalUsed, false)),
+	}
 
-	statusVal := statusText.Width(
-		dm.width - (w(modeKey) * 3) - w(capacityKey) - (w(totalCapacity) * 3),
-	).Render("Drives List")
-
-	return statusBarStyle.
-		Margin(1, 0, 1, 0).
-		Render(
-			lipgloss.JoinHorizontal(
-				lipgloss.Top,
-				modeKey,
-				statusVal,
-				capacityKey,
-				totalCapacity,
-				statusStyle.Render("FREE"),
-				statusText.Render(fmtSize(dl.TotalFree, false)),
-				statusStyle.Render("USED"),
-				statusText.Render(fmtSize(dl.TotalUsed, false)),
-			),
-		)
+	return statusBarStyle.Margin(1, 0, 1, 0).
+		Render(NewStatusBar(items, dm.width))
 }
 
 func (dm *DriveModel) sortDrives(sortKey drive.SortKey) {

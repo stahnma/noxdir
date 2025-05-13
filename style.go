@@ -21,4 +21,10 @@ var (
 	topFileStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#ebbd34")).
 			Bold(true)
+
+	helpDescStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#696868"))
+
+	bindKeyStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#ffbf69"))
 )

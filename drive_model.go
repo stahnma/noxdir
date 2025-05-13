@@ -88,7 +88,6 @@ func (dm *DriveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (dm *DriveModel) View() string {
-	keyBindings := append(dm.drivesTable.KeyMap.FullHelp(), drivesKeyMap...)
 	summary := dm.drivesSummary()
 
 	return lipgloss.JoinVertical(
@@ -96,15 +95,18 @@ func (dm *DriveModel) View() string {
 		summary,
 		dm.drivesTable.View(),
 		summary,
-		dm.drivesTable.Help.FullHelpView(keyBindings),
+		dm.drivesTable.Help.FullHelpView(
+			append(navigateKeyMap, drivesKeyMap...),
+		),
 	)
 }
 
 func (dm *DriveModel) updateTableData(key drive.SortKey, sortDesc bool) {
-	tableWidth, iconWidth := dm.width, 5
+	pathWidth, iconWidth := 30, 5
+	tableWidth := dm.width
 
-	colWidth := int(float64(tableWidth) * 0.08)
-	progressWidth := tableWidth - (colWidth * 7) - iconWidth
+	colWidth := int(float64(tableWidth) * 0.07)
+	progressWidth := tableWidth - (colWidth * 6) - iconWidth - pathWidth
 
 	columns := make([]table.Column, len(dm.driveColumns))
 
@@ -116,6 +118,7 @@ func (dm *DriveModel) updateTableData(key drive.SortKey, sortDesc bool) {
 	}
 
 	columns[0].Width = iconWidth
+	columns[1].Width = pathWidth
 	columns[len(columns)-1].Width = progressWidth
 
 	dm.drivesTable.SetColumns(columns)

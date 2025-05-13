@@ -80,14 +80,14 @@ func (dm *DirModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		dm.updateSize(msg.Width, msg.Height)
 	case tea.KeyMsg:
+		if dm.nav.State() == Drives {
+			return dm, nil
+		}
+
 		bk := bindingKey(strings.ToLower(msg.String()))
 
 		switch bk {
 		case explore:
-			if dm.nav.State() == Drives {
-				return dm, nil
-			}
-
 			sr := dm.dirsTable.SelectedRow()
 			if len(sr) < 2 {
 				return dm, nil
@@ -116,8 +116,9 @@ func (dm *DirModel) View() string {
 	h := lipgloss.Height
 
 	keyBindings := dm.dirsTable.Help.FullHelpView(
-		append(dm.dirsTable.KeyMap.FullHelp(), dirsKeyMap...),
+		append(navigateKeyMap, dirsKeyMap...),
 	)
+
 	summary := dm.dirsSummary()
 
 	dirsTableHeight := dm.height - h(keyBindings) - (h(summary) * 2)

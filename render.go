@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/crumbyte/noxdir/drive"
+	"github.com/crumbyte/noxdir/structure"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/progress"
@@ -92,7 +93,7 @@ func (vm *ViewModel) levelDown() {
 
 	done, errChan := vm.nav.LevelDown(
 		sr[1],
-		func(_ *Entry, _ State) {
+		func(_ *structure.Entry, _ State) {
 			vm.dirModel.updateTableData()
 		},
 	)

@@ -1,4 +1,4 @@
-package main
+package structure
 
 import (
 	"bytes"
@@ -25,7 +25,7 @@ const (
 	bfsQueueSize     = 64
 )
 
-var topFilesInstance = topFiles{size: maxTopFiles}
+var TopFilesInstance = TopFiles{size: maxTopFiles}
 
 // Entry contains the information about a single directory or a file instance
 // within the file system. If the entry represents a directory instance, it has
@@ -226,8 +226,8 @@ func (e *Entry) Traverse() error {
 func (e *Entry) TraverseAsync() (chan struct{}, chan error) {
 	var wg sync.WaitGroup
 
-	topFilesInstance.Reset()
-	heap.Init(&topFilesInstance)
+	TopFilesInstance.Reset()
+	heap.Init(&TopFilesInstance)
 
 	if !e.IsDir {
 		return nil, nil
@@ -332,7 +332,7 @@ func handleEntry(e *Entry, onNewDir func(*Entry), onErr func(error)) {
 
 		fe := NewFileEntry(childPath, child.Size(), child.ModTime())
 
-		topFilesInstance.PushSafe(fe)
+		TopFilesInstance.PushSafe(fe)
 		e.AddChild(fe)
 	}
 }

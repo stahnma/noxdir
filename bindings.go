@@ -12,17 +12,19 @@ func (bk bindingKey) String() string {
 }
 
 const (
-	backspace      bindingKey = "backspace"
-	quit           bindingKey = "q"
-	cancel         bindingKey = "ctrl+c"
-	enter          bindingKey = "enter"
-	sort           bindingKey = "s"
-	explore        bindingKey = "e"
-	sortTotalCap   bindingKey = "alt+t"
-	sortTotalUsed  bindingKey = "alt+u"
-	sortTotalFree  bindingKey = "alt+f"
-	sortTotalUsedP bindingKey = "alt+g"
-	toggleTopFiles bindingKey = "ctrl+q"
+	backspace         bindingKey = "backspace"
+	quit              bindingKey = "q"
+	cancel            bindingKey = "ctrl+c"
+	enter             bindingKey = "enter"
+	sort              bindingKey = "s"
+	explore           bindingKey = "e"
+	sortTotalCap      bindingKey = "alt+t"
+	sortTotalUsed     bindingKey = "alt+u"
+	sortTotalFree     bindingKey = "alt+f"
+	sortTotalUsedP    bindingKey = "alt+g"
+	toggleTopFiles    bindingKey = "ctrl+q"
+	toggleDirsFilter  bindingKey = "."
+	toggleFilesFilter bindingKey = ","
 )
 
 var navigateKeyMap = [][]key.Binding{
@@ -162,6 +164,20 @@ var dirsKeyMap = [][]key.Binding{
 			key.WithHelp(
 				bindKeyStyle.Render(toggleTopFiles.String()),
 				helpDescStyle.Render(" - \U000F028B toggle top files"),
+			),
+		),
+		key.NewBinding(
+			key.WithKeys(toggleDirsFilter.String()),
+			key.WithHelp(
+				bindKeyStyle.Render(toggleDirsFilter.String()),
+				helpDescStyle.Render(" - \uF4D3 toggle dirs only"),
+			),
+		),
+		key.NewBinding(
+			key.WithKeys(toggleFilesFilter.String()),
+			key.WithHelp(
+				bindKeyStyle.Render(toggleFilesFilter.String()),
+				helpDescStyle.Render(" - \uF15B toggle files only"),
 			),
 		),
 	},

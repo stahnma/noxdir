@@ -4,6 +4,7 @@ import (
 	"sync/atomic"
 
 	"github.com/crumbyte/noxdir/drive"
+	"github.com/crumbyte/noxdir/structure"
 )
 
 // State defines a custom type representing a current GUI state.
@@ -14,13 +15,13 @@ const (
 	Dirs
 )
 
-type ChangeLevelHandler func(e *Entry, s State)
+type ChangeLevelHandler func(e *structure.Entry, s State)
 
 type Navigation struct {
-	entry        *Entry
+	entry        *structure.Entry
 	drives       *drive.List
 	currentDrive *drive.Info
-	entryStack   []*Entry
+	entryStack   []*structure.Entry
 	state        State
 	locked       atomic.Bool
 }
@@ -40,7 +41,7 @@ func (n *Navigation) DrivesList() *drive.List {
 	return n.drives
 }
 
-func (n *Navigation) Entry() *Entry {
+func (n *Navigation) Entry() *structure.Entry {
 	return n.entry
 }
 
@@ -88,7 +89,7 @@ func (n *Navigation) LevelDown(path string, clh ChangeLevelHandler) (chan struct
 	if n.state == Drives {
 		n.state = Dirs
 
-		n.entry = NewDirEntry(path, 0)
+		n.entry = structure.NewDirEntry(path, 0)
 		n.currentDrive = n.drives.DriveInfo(path)
 
 		return n.entry.TraverseAsync()

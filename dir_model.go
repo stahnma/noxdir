@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crumbyte/noxdir/structure"
+
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -22,6 +24,7 @@ type DirModel struct {
 	dirsTable     *table.Model
 	topFilesTable *table.Model
 	nav           *Navigation
+	filters       structure.FiltersList
 	lastErr       []error
 	width         int
 	height        int
@@ -41,6 +44,7 @@ func NewDirModel(nav *Navigation) *DirModel {
 			{Title: "Parent usage"},
 			{Title: ""},
 		},
+		filters:       structure.NewFiltersList(),
 		dirsTable:     buildTable(),
 		topFilesTable: buildTable(),
 		nav:           nav,
@@ -99,6 +103,12 @@ func (dm *DirModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case toggleTopFiles:
 			dm.showTopFiles = !dm.showTopFiles
 			dm.updateSize(dm.width, dm.height)
+		case toggleDirsFilter:
+			dm.filters.ToggleFilter(&structure.DirsFilter{})
+			dm.updateTableData()
+		case toggleFilesFilter:
+			dm.filters.ToggleFilter(&structure.FilesFilter{})
+			dm.updateTableData()
 		}
 	}
 
@@ -171,6 +181,10 @@ func (dm *DirModel) updateTableData() {
 	dm.nav.Entry().SortChild()
 
 	for _, child := range dm.nav.Entry().Child {
+		if !dm.filters.Valid(child) {
+			continue
+		}
+
 		totalDirs, totalFiles := "", ""
 
 		if child.IsDir {
@@ -249,15 +263,15 @@ func (dm *DirModel) fillTopFiles() {
 	dm.topFilesTable.SetColumns(columns)
 	dm.topFilesTable.SetCursor(0)
 
-	if topFilesInstance.Len() == 0 || dm.topFilesTable.Rows() != nil {
+	if structure.TopFilesInstance.Len() == 0 || dm.topFilesTable.Rows() != nil {
 		return
 	}
 
 	rows := make([]table.Row, 15)
-	heap.Pop(&topFilesInstance)
+	heap.Pop(&structure.TopFilesInstance)
 
 	for i := len(rows) - 1; i >= 0; i-- {
-		file, ok := heap.Pop(&topFilesInstance).(*Entry)
+		file, ok := heap.Pop(&structure.TopFilesInstance).(*structure.Entry)
 		if !ok {
 			continue
 		}

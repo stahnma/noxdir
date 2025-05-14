@@ -1,10 +1,12 @@
 package main
 
+import "github.com/crumbyte/noxdir/structure"
+
 // EntryIcon resolves an emoji icon for the provided Entry instance based on the
 // file extension.
 //
 //nolint:cyclop,funlen // speed and simplicity over another map resolver
-func EntryIcon(e *Entry) string {
+func EntryIcon(e *structure.Entry) string {
 	icon := "📁"
 
 	if e.IsDir {

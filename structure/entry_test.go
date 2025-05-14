@@ -1,4 +1,4 @@
-package main
+package structure_test
 
 import (
 	"errors"
@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/crumbyte/noxdir/structure"
 
 	"github.com/stretchr/testify/require"
 )
@@ -69,7 +71,7 @@ func TestEntry_Traverse(t *testing.T) {
 
 	entryRoot := initTmpEntry(t, &testEntryInstance, root)
 
-	e := NewDirEntry(entryRoot, 0)
+	e := structure.NewDirEntry(entryRoot, 0)
 
 	require.NoError(t, e.Traverse())
 	e.CalculateSize()
@@ -91,7 +93,7 @@ func TestEntry_TraverseAsync(t *testing.T) {
 
 	entryRoot := initTmpEntry(t, &testEntryInstance, root)
 
-	e := NewDirEntry(entryRoot, 0)
+	e := structure.NewDirEntry(entryRoot, 0)
 
 	done, errCh := e.TraverseAsync()
 
@@ -118,7 +120,7 @@ func TestEntry_TraverseAsync(t *testing.T) {
 }
 
 func TestEntry_AddChild(t *testing.T) {
-	e := NewDirEntry("root", 0)
+	e := structure.NewDirEntry("root", 0)
 
 	require.False(t, e.HasChild())
 
@@ -139,10 +141,10 @@ func TestEntry_AddChild(t *testing.T) {
 	for i := range tableData {
 		path := "root" + string(os.PathSeparator) + tableData[i].name
 
-		childEntry := NewFileEntry(path, 1, 0)
+		childEntry := structure.NewFileEntry(path, 1, 0)
 
 		if tableData[i].isDir {
-			childEntry = NewDirEntry(path, 0)
+			childEntry = structure.NewDirEntry(path, 0)
 		}
 
 		e.AddChild(childEntry)
@@ -157,7 +159,7 @@ func TestEntry_AddChild(t *testing.T) {
 	require.EqualValues(t, 3, e.TotalDirs)
 }
 
-func verifyEntryStructure(t *testing.T, e *Entry, te *testEntry) {
+func verifyEntryStructure(t *testing.T, e *structure.Entry, te *testEntry) {
 	t.Helper()
 
 	require.Equal(t, te.name, e.Name())

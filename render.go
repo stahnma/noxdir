@@ -86,6 +86,7 @@ func (vm *ViewModel) levelDown() {
 	}
 
 	sr := vm.dirModel.dirsTable.SelectedRow()
+	cursor := vm.dirModel.dirsTable.Cursor()
 
 	if vm.nav.State() == Drives {
 		sr = vm.driveModel.drivesTable.SelectedRow()
@@ -93,6 +94,7 @@ func (vm *ViewModel) levelDown() {
 
 	done, errChan := vm.nav.LevelDown(
 		sr[1],
+		cursor,
 		func(_ *structure.Entry, _ State) {
 			vm.dirModel.updateTableData()
 		},

@@ -17,12 +17,18 @@ const (
 
 type ChangeLevelHandler func(e *structure.Entry, s State)
 
+type stackItem struct {
+	entry  *structure.Entry
+	cursor int
+}
+
 type Navigation struct {
 	entry        *structure.Entry
 	drives       *drive.List
 	currentDrive *drive.Info
-	entryStack   []*structure.Entry
+	entryStack   []*stackItem
 	state        State
+	cursor       int
 	locked       atomic.Bool
 }
 
@@ -72,16 +78,18 @@ func (n *Navigation) LevelUp() {
 	}
 
 	if len(n.entryStack) == 0 {
-		n.state = Drives
+		n.state, n.cursor = Drives, 0
 
 		return
 	}
 
-	n.entry = n.entryStack[len(n.entryStack)-1]
+	lastItem := n.entryStack[len(n.entryStack)-1]
+
+	n.entry, n.cursor = lastItem.entry, lastItem.cursor
 	n.entryStack = n.entryStack[:len(n.entryStack)-1]
 }
 
-func (n *Navigation) LevelDown(path string, clh ChangeLevelHandler) (chan struct{}, chan error) {
+func (n *Navigation) LevelDown(path string, cursor int, clh ChangeLevelHandler) (chan struct{}, chan error) {
 	if n.Lock() && len(path) == 0 {
 		return nil, nil
 	}
@@ -104,7 +112,13 @@ func (n *Navigation) LevelDown(path string, clh ChangeLevelHandler) (chan struct
 		return nil, nil
 	}
 
-	n.entryStack, n.entry = append(n.entryStack, n.entry), entry
+	n.entryStack = append(
+		n.entryStack,
+		&stackItem{entry: n.entry, cursor: cursor},
+	)
+
+	n.entry = entry
+	n.cursor = 0
 
 	return nil, nil
 }

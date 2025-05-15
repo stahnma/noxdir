@@ -219,7 +219,7 @@ func (dm *DirModel) updateTableData() {
 	}
 
 	dm.dirsTable.SetRows(rows)
-	dm.dirsTable.SetCursor(0)
+	dm.dirsTable.SetCursor(dm.nav.cursor)
 }
 
 func (dm *DirModel) dirsSummary() string {

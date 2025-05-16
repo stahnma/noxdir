@@ -19,13 +19,9 @@ cleanup workflow.
 
 ## 📸 Preview
 
-### Drives list
-
-![The San Juan Mountains are beautiful!](/img/drives.png "drives list")
-
-### Directories list
-
-![The San Juan Mountains are beautiful!](/img/dirs.png "directories list")
+Drives list             |  Directories list
+:-------------------------:|:-------------------------:
+![The San Juan Mountains are beautiful!](/img/drives.png "drives list")  |  ![The San Juan Mountains are beautiful!](/img/dirs.png "directories list")
 
 ## 📦 Installation
 

@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	DefaultBorder     = '\ue0b0'
 	DefaultBarBGColor = "#353533"
 	DynamicWidth      = -1
 )
@@ -22,12 +23,17 @@ type BarItem struct {
 	content string
 	bgColor string
 	width   int
+	border  rune
 }
 
 // DefaultBarItem returns a new *BarItem instance with default values for
 // background color and width.
 func DefaultBarItem(content string) *BarItem {
-	return &BarItem{content: content, bgColor: DefaultBarBGColor}
+	return &BarItem{
+		content: content,
+		bgColor: DefaultBarBGColor,
+		border:  DefaultBorder,
+	}
 }
 
 // NewBarItem returns a new *BarItem instance based on the provided parameters.
@@ -41,6 +47,7 @@ func NewBarItem(content, bgColor string, width int) *BarItem {
 		content: content,
 		bgColor: bgColor,
 		width:   width,
+		border:  DefaultBorder,
 	}
 }
 
@@ -59,12 +66,17 @@ func NewStatusBar(items []*BarItem, totalWidth int) string {
 	for i := range items {
 		item := items[i]
 
-		itemStyle := newBarBlock(item.bgColor, i != len(items)-1)
+		if i == len(items)-1 {
+			item.border = 0
+		}
+
+		itemStyle := newBarBlockStyle(item)
 
 		if item.width > 0 {
 			itemStyle = itemStyle.Width(item.width)
 		}
 
+		// set the current item border bg color same as next bar item bg color.
 		if i+1 < len(items) {
 			itemStyle = itemStyle.BorderBackground(
 				lipgloss.Color(items[i+1].bgColor),
@@ -105,16 +117,16 @@ func NewStatusBar(items []*BarItem, totalWidth int) string {
 	return lipgloss.JoinHorizontal(lipgloss.Top, renderItems...)
 }
 
-func newBarBlock(bgColor string, border bool) lipgloss.Style {
+func newBarBlockStyle(bi *BarItem) lipgloss.Style {
 	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FFFDF5")).
-		Background(lipgloss.Color(bgColor)).
+		Background(lipgloss.Color(bi.bgColor)).
 		Padding(0, 1)
 
-	if border {
+	if bi.border != 0 {
 		style = style.Border(
-			lipgloss.Border{Right: string('\ue0b0')}, false, true, false, false).
-			BorderForeground(lipgloss.Color(bgColor))
+			lipgloss.Border{Right: string(bi.border)}, false, true, false, false).
+			BorderForeground(lipgloss.Color(bi.bgColor))
 	}
 
 	return style

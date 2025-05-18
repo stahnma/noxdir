@@ -226,6 +226,7 @@ func (e *Entry) Traverse() error {
 func (e *Entry) TraverseAsync() (chan struct{}, chan error) {
 	var wg sync.WaitGroup
 
+	drive.InoFilterInstance.Reset()
 	TopFilesInstance.Reset()
 	heap.Init(&TopFilesInstance)
 

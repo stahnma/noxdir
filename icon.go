@@ -21,15 +21,15 @@ func EntryIcon(e *structure.Entry) string {
 	case "go", "py", "js", "ts", "java", "cpp", "c", "cs", "rb", "rs", "sh", "php":
 		icon = "💻"
 	case "jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff":
-		icon = "🖼️"
+		icon = "🖼"
 	case "mp4", "mkv", "avi", "mov", "webm", "m4v", "wmv":
-		icon = "🎞️"
+		icon = "🎞"
 	case "json", "csv", "xml", "env", "yml", "yaml", "ini":
 		icon = "🔧"
 	case "jks", "pub", "key", "p12", "ppk":
 		icon = "🔑"
 	case "zip", "rar", "7z", "tar", "gz":
-		icon = "🗃️"
+		icon = "🗃"
 	case "mp3", "wav", "flac", "ogg":
 		icon = "🎵"
 	case "exe", "bin", "dll", "app":

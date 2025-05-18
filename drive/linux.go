@@ -205,7 +205,7 @@ func ReadDir(path string) ([]FileInfo, error) {
 			var stat unix.Stat_t
 
 			err = unix.Fstatat(fd, name, &stat, unix.AT_SYMLINK_NOFOLLOW)
-			if err == nil {
+			if err == nil && InoFilterInstance.Add(stat.Ino) {
 				fis = append(fis, NewFileInfo(name, &stat))
 			}
 

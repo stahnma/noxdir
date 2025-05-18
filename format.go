@@ -10,8 +10,8 @@ type numeric interface {
 }
 
 func fmtSize[T numeric](bytesSize T, fmtWidth bool) string {
-	units := []string{"B", "KB", "MB", "GB", "TB", "PB"}
-	totalLength, unitIdx := 9, 0
+	units := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB"}
+	totalLength, unitIdx := 13, 0
 	size := float64(bytesSize)
 
 	for ; size > 1024; unitIdx++ {

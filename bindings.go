@@ -33,58 +33,28 @@ var navigateKeyMap = [][]key.Binding{
 			key.WithKeys("up", "k"),
 			key.WithHelp(
 				bindKeyStyle.Render("↑/k"),
-				helpDescStyle.Render(" - up"),
+				helpDescStyle.Render(" - \uF062 up"),
 			),
 		),
 		key.NewBinding(
 			key.WithKeys("down", "j"),
 			key.WithHelp(
 				bindKeyStyle.Render("↓/j"),
-				helpDescStyle.Render(" - down"),
-			),
-		),
-		key.NewBinding(
-			key.WithKeys("b", "pgup"),
-			key.WithHelp(
-				bindKeyStyle.Render("b/pgup"),
-				helpDescStyle.Render(" - page up"),
-			),
-		),
-		key.NewBinding(
-			key.WithKeys("f", "pgdown", " "),
-			key.WithHelp(
-				bindKeyStyle.Render("f/pgdn"),
-				helpDescStyle.Render(" - page down"),
-			),
-		),
-	},
-	{
-		key.NewBinding(
-			key.WithKeys("u", "ctrl+u"),
-			key.WithHelp(
-				bindKeyStyle.Render("u"),
-				helpDescStyle.Render(" - page up"),
-			),
-		),
-		key.NewBinding(
-			key.WithKeys("d", "ctrl+d"),
-			key.WithHelp(
-				bindKeyStyle.Render("d"),
-				helpDescStyle.Render(" - page down"),
+				helpDescStyle.Render(" - \uF063 down"),
 			),
 		),
 		key.NewBinding(
 			key.WithKeys("home", "g"),
 			key.WithHelp(
 				bindKeyStyle.Render("g/home"),
-				helpDescStyle.Render(" - go to start"),
+				helpDescStyle.Render(" - \uF149 go to start"),
 			),
 		),
 		key.NewBinding(
 			key.WithKeys("end", "G"),
 			key.WithHelp(
 				bindKeyStyle.Render("G/end"),
-				helpDescStyle.Render(" - go to end"),
+				helpDescStyle.Render(" - \uF149 go to end"),
 			),
 		),
 	},

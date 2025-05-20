@@ -74,7 +74,6 @@ func mntList() ([]unix.Statfs_t, error) {
 func statFSToInfo(stat *unix.Statfs_t) *Info {
 	usedBlocks := stat.Blocks - stat.Bfree
 
-	//nolint:gosec // try guessing
 	blockSize := uint64(stat.Bsize)
 
 	return &Info{

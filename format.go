@@ -9,9 +9,9 @@ type numeric interface {
 	int | uint | uint64 | int64 | int32 | float64 | float32
 }
 
-func fmtSize[T numeric](bytesSize T, fmtWidth bool) string {
+func fmtSize[T numeric](bytesSize T, length int, fmtWidth bool) string {
 	units := []string{"B", "KiB", "MiB", "GiB", "TiB", "PiB"}
-	totalLength, unitIdx := 13, 0
+	unitIdx := 0
 	size := float64(bytesSize)
 
 	for ; size > 1024; unitIdx++ {
@@ -21,11 +21,11 @@ func fmtSize[T numeric](bytesSize T, fmtWidth bool) string {
 	sizeFmt := fmt.Sprintf("%.2f", size)
 
 	if !fmtWidth {
-		totalLength = len(sizeFmt)
+		length = len(sizeFmt)
 	}
 
 	return fmt.Sprintf(
-		"%s %*s", sizeFmt, totalLength-len(sizeFmt), units[unitIdx],
+		"%s %*s", sizeFmt, length-len(sizeFmt), units[unitIdx],
 	)
 }
 

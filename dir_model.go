@@ -208,7 +208,7 @@ func (dm *DirModel) updateTableData() {
 				EntryIcon(child),
 				name,
 				fmtName,
-				fmtSize(child.Size, true),
+				fmtSize(child.Size, 13, true),
 				totalDirs,
 				totalFiles,
 				time.Unix(child.ModTime, 0).Format("2006-01-02 15:04"),
@@ -234,7 +234,7 @@ func (dm *DirModel) dirsSummary() string {
 		NewBarItem(dm.nav.Entry().Path, "", -1),
 		NewBarItem(state, "#FF8531", 0),
 		NewBarItem("SIZE", "#FF5F87", 0),
-		DefaultBarItem(fmtSize(dm.nav.Entry().Size, false)),
+		DefaultBarItem(fmtSize(dm.nav.Entry().Size, 13, false)),
 		NewBarItem("DIRS", "#FF5F87", 0),
 		DefaultBarItem(unitFmt(dm.nav.Entry().LocalDirs)),
 		NewBarItem("FILES", "#FF5F87", 0),
@@ -285,7 +285,7 @@ func (dm *DirModel) fillTopFiles() {
 			EntryIcon(file),
 			file.Path,
 			path + topFileStyle.Render(file.Name()),
-			fmtSize(file.Size, true),
+			fmtSize(file.Size, 13, true),
 			time.Unix(file.ModTime, 0).Format("2006-01-02 15:04"),
 		}
 	}

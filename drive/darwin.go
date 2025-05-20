@@ -3,9 +3,13 @@
 package drive
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
+	"sync"
+	"time"
+	"unsafe"
 
 	"golang.org/x/sys/unix"
 )
@@ -70,17 +74,20 @@ func mntList() ([]unix.Statfs_t, error) {
 func statFSToInfo(stat *unix.Statfs_t) *Info {
 	usedBlocks := stat.Blocks - stat.Bfree
 
+	//nolint:gosec // try guessing
+	blockSize := uint64(stat.Bsize)
+
 	return &Info{
 		Path:        bytePtrToString(stat.Mntonname[:]),
 		FSName:      bytePtrToString(stat.Fstypename[:]),
-		TotalBytes:  stat.Blocks * uint64(stat.Bsize),
-		FreeBytes:   stat.Bfree * uint64(stat.Bsize),
-		UsedBytes:   usedBlocks * uint64(stat.Bsize),
+		TotalBytes:  stat.Blocks * blockSize,
+		FreeBytes:   stat.Bfree * blockSize,
+		UsedBytes:   usedBlocks * blockSize,
 		UsedPercent: (float64(usedBlocks) / float64(stat.Blocks)) * 100,
 	}
 }
 
-func ReadDir(path string) ([]FileInfo, error) {
+func ReadDirLegacy(path string) ([]FileInfo, error) {
 	fis := make([]FileInfo, 0, 32)
 
 	entry, err := os.Open(path)
@@ -118,6 +125,96 @@ func ReadDir(path string) ([]FileInfo, error) {
 	}
 
 	return fis, nil
+}
+
+func NewFileInfo(name string, data *unix.Stat_t) FileInfo {
+	return FileInfo{
+		name:    name,
+		isDir:   data.Mode&unix.S_IFMT == unix.S_IFDIR,
+		size:    data.Size,
+		modTime: time.Unix(int64(data.Mtim.Sec), int64(data.Mtim.Nsec)).Unix(),
+	}
+}
+
+var direntBufPool = sync.Pool{
+	New: func() any {
+		b := make([]byte, 1024*64)
+
+		return &b
+	},
+}
+
+func ReadDir(path string) ([]FileInfo, error) {
+	fd, err := unix.Open(path, unix.O_RDONLY|unix.O_DIRECTORY, 0)
+	if err != nil {
+		return nil, fmt.Errorf("open %s: %w", path, err)
+	}
+
+	defer func(fd int) {
+		_ = unix.Close(fd)
+	}(fd)
+
+	buf, ok := direntBufPool.Get().(*[]byte)
+	if !ok {
+		return nil, errors.New("get dirent buffer")
+	}
+
+	defer direntBufPool.Put(buf)
+
+	fis := make([]FileInfo, 0, 32)
+
+	var n int
+
+	for {
+		n, err = unix.ReadDirent(fd, *buf)
+		if err != nil {
+			return nil, fmt.Errorf("getdents error: %w", err)
+		}
+
+		if n == 0 {
+			break
+		}
+
+		offset := 0
+
+		for offset < n {
+			dirent := (*unix.Dirent)(unsafe.Pointer(&(*buf)[offset]))
+
+			nameBytes := (*[256]byte)(unsafe.Pointer(&dirent.Name[0]))
+			name := bytePtrToString(nameBytes[:])
+
+			if pathExcluded(path, name) {
+				offset += int(dirent.Reclen)
+
+				continue
+			}
+
+			var stat unix.Stat_t
+
+			err = unix.Fstatat(fd, name, &stat, unix.AT_SYMLINK_NOFOLLOW)
+			if err == nil && InoFilterInstance.Add(stat.Ino) {
+				fis = append(fis, NewFileInfo(name, &stat))
+			}
+
+			offset += int(dirent.Reclen)
+		}
+	}
+
+	return fis, nil
+}
+
+func pathExcluded(path, name string) bool {
+	if name == "." || name == ".." {
+		return true
+	}
+
+	if excludedChild, excluded := excludedPaths[path]; excluded {
+		_, childExcluded := excludedChild[name]
+
+		return childExcluded
+	}
+
+	return false
 }
 
 func Explore(path string) error {

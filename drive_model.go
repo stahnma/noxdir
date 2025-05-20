@@ -136,9 +136,9 @@ func (dm *DriveModel) updateTableData(key drive.SortKey, sortDesc bool) {
 			d.Path,
 			d.Volume,
 			d.FSName,
-			fmtSize(d.TotalBytes, true),
-			fmtSize(d.UsedBytes, true),
-			fmtSize(d.FreeBytes, true),
+			fmtSize(d.TotalBytes, 9, true),
+			fmtSize(d.UsedBytes, 9, true),
+			fmtSize(d.FreeBytes, 9, true),
 			strconv.FormatFloat(d.UsedPercent, 'f', 2, 64) + " %",
 			lipgloss.JoinHorizontal(
 				lipgloss.Top,
@@ -159,11 +159,11 @@ func (dm *DriveModel) drivesSummary() string {
 		NewBarItem("MODE", "#FF5F87", 0),
 		NewBarItem("Drives List", "", -1),
 		NewBarItem("CAPACITY", "#FF5F87", 0),
-		DefaultBarItem(fmtSize(dl.TotalCapacity, false)),
+		DefaultBarItem(fmtSize(dl.TotalCapacity, 9, false)),
 		NewBarItem("FREE", "#FF5F87", 0),
-		DefaultBarItem(fmtSize(dl.TotalFree, false)),
+		DefaultBarItem(fmtSize(dl.TotalFree, 9, false)),
 		NewBarItem("USED", "#FF5F87", 0),
-		DefaultBarItem(fmtSize(dl.TotalUsed, false)),
+		DefaultBarItem(fmtSize(dl.TotalUsed, 9, false)),
 	}
 
 	return statusBarStyle.Margin(1, 0, 1, 0).

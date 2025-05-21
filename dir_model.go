@@ -19,6 +19,13 @@ const (
 	colWidthRatio       = 0.13
 )
 
+type Mode string
+
+const (
+	PENDING Mode = "PENDING"
+	READY   Mode = "READY"
+)
+
 type DirModel struct {
 	columns       []Column
 	dirsTable     *table.Model
@@ -208,7 +215,7 @@ func (dm *DirModel) updateTableData() {
 				EntryIcon(child),
 				name,
 				fmtName,
-				fmtSize(child.Size, 13, true),
+				fmtSize(child.Size, true),
 				totalDirs,
 				totalFiles,
 				time.Unix(child.ModTime, 0).Format("2006-01-02 15:04"),
@@ -223,18 +230,18 @@ func (dm *DirModel) updateTableData() {
 }
 
 func (dm *DirModel) dirsSummary() string {
-	state := "READY"
+	state := READY
 
 	if dm.nav.Locked() {
-		state = "PENDING"
+		state = PENDING
 	}
 
 	items := []*BarItem{
 		NewBarItem("PATH", "#FF5F87", 0),
 		NewBarItem(dm.nav.Entry().Path, "", -1),
-		NewBarItem(state, "#FF8531", 0),
+		NewBarItem(string(state), "#FF8531", 0),
 		NewBarItem("SIZE", "#FF5F87", 0),
-		DefaultBarItem(fmtSize(dm.nav.Entry().Size, 13, false)),
+		DefaultBarItem(fmtSize(dm.nav.Entry().Size, false)),
 		NewBarItem("DIRS", "#FF5F87", 0),
 		DefaultBarItem(unitFmt(dm.nav.Entry().LocalDirs)),
 		NewBarItem("FILES", "#FF5F87", 0),
@@ -285,7 +292,7 @@ func (dm *DirModel) fillTopFiles() {
 			EntryIcon(file),
 			file.Path,
 			path + topFileStyle.Render(file.Name()),
-			fmtSize(file.Size, 13, true),
+			fmtSize(file.Size, true),
 			time.Unix(file.ModTime, 0).Format("2006-01-02 15:04"),
 		}
 	}

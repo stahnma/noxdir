@@ -72,7 +72,7 @@ func (n *Navigation) ParentSize() int64 {
 	return n.entry.Size
 }
 
-func (n *Navigation) LevelUp() {
+func (n *Navigation) LevelUp(clh ChangeLevelHandler) {
 	if n.state == Drives {
 		return
 	}
@@ -82,6 +82,10 @@ func (n *Navigation) LevelUp() {
 
 		return
 	}
+
+	defer func() {
+		clh(n.entry, n.state)
+	}()
 
 	lastItem := n.entryStack[len(n.entryStack)-1]
 

@@ -25,6 +25,7 @@ const (
 	toggleTopFiles    bindingKey = "ctrl+q"
 	toggleDirsFilter  bindingKey = "."
 	toggleFilesFilter bindingKey = ","
+	toggleNameFilter  bindingKey = "ctrl+f"
 )
 
 var navigateKeyMap = [][]key.Binding{
@@ -148,6 +149,13 @@ var dirsKeyMap = [][]key.Binding{
 			key.WithHelp(
 				bindKeyStyle.Render(toggleFilesFilter.String()),
 				helpDescStyle.Render(" - \uF15B toggle files only"),
+			),
+		),
+		key.NewBinding(
+			key.WithKeys(toggleNameFilter.String()),
+			key.WithHelp(
+				bindKeyStyle.Render(toggleNameFilter.String()),
+				helpDescStyle.Render(" - \uEA6D toggle name filter"),
 			),
 		),
 	},

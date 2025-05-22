@@ -56,6 +56,10 @@ func (vm *ViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		bk := bindingKey(strings.ToLower(msg.String()))
 
+		if vm.dirModel.mode == INPUT {
+			break
+		}
+
 		switch bk {
 		case quit, cancel:
 			return vm, tea.Quit
@@ -96,6 +100,7 @@ func (vm *ViewModel) levelDown() {
 		sr[1],
 		cursor,
 		func(_ *structure.Entry, _ State) {
+			vm.dirModel.filters.Reset()
 			vm.dirModel.updateTableData()
 		},
 	)
@@ -140,16 +145,17 @@ func (vm *ViewModel) levelUp() {
 	}
 	defer vm.nav.Unlock()
 
-	vm.nav.LevelUp()
+	vm.nav.LevelUp(func(_ *structure.Entry, _ State) {
+		if vm.nav.State() == Drives {
+			vm.driveModel.resetSort()
+			vm.driveModel.updateTableData(drive.TotalUsedP, true)
 
-	if vm.nav.State() == Drives {
-		vm.driveModel.resetSort()
-		vm.driveModel.updateTableData(drive.TotalUsedP, true)
+			return
+		}
 
-		return
-	}
-
-	vm.dirModel.updateTableData()
+		vm.dirModel.filters.Reset()
+		vm.dirModel.updateTableData()
+	})
 }
 
 func NewProgressBar(width int, full, empty rune) progress.Model {

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crumbyte/noxdir/filter"
 	"github.com/crumbyte/noxdir/structure"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -24,6 +25,7 @@ type Mode string
 const (
 	PENDING Mode = "PENDING"
 	READY   Mode = "READY"
+	INPUT   Mode = "INPUT"
 )
 
 type DirModel struct {
@@ -31,7 +33,8 @@ type DirModel struct {
 	dirsTable     *table.Model
 	topFilesTable *table.Model
 	nav           *Navigation
-	filters       structure.FiltersList
+	filters       filter.FiltersList
+	mode          Mode
 	lastErr       []error
 	width         int
 	height        int
@@ -51,9 +54,14 @@ func NewDirModel(nav *Navigation) *DirModel {
 			{Title: "Parent usage"},
 			{Title: ""},
 		},
-		filters:       structure.NewFiltersList(),
+		filters: filter.NewFiltersList(
+			filter.NewNameFilter("type..."),
+			&filter.DirsFilter{},
+			&filter.FilesFilter{},
+		),
 		dirsTable:     buildTable(),
 		topFilesTable: buildTable(),
+		mode:          PENDING,
 		nav:           nav,
 	}
 
@@ -82,6 +90,8 @@ func (dm *DirModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		dm.updateTableData()
 	case scanFinished:
+		dm.mode = READY
+
 		runtime.GC()
 		dm.nav.Entry().CalculateSize()
 		dm.updateTableData()
@@ -91,31 +101,8 @@ func (dm *DirModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		dm.updateSize(msg.Width, msg.Height)
 	case tea.KeyMsg:
-		if dm.nav.State() == Drives {
+		if dm.nav.State() == Drives || dm.handleKeyBindings(msg) {
 			return dm, nil
-		}
-
-		bk := bindingKey(strings.ToLower(msg.String()))
-
-		switch bk {
-		case explore:
-			sr := dm.dirsTable.SelectedRow()
-			if len(sr) < 2 {
-				return dm, nil
-			}
-
-			if err := dm.nav.Explore(sr[1]); err != nil {
-				return dm, nil
-			}
-		case toggleTopFiles:
-			dm.showTopFiles = !dm.showTopFiles
-			dm.updateSize(dm.width, dm.height)
-		case toggleDirsFilter:
-			dm.filters.ToggleFilter(&structure.DirsFilter{})
-			dm.updateTableData()
-		case toggleFilesFilter:
-			dm.filters.ToggleFilter(&structure.FilesFilter{})
-			dm.updateTableData()
 		}
 	}
 
@@ -152,9 +139,66 @@ func (dm *DirModel) View() string {
 		rows = append(rows, dm.dirsTable.View())
 	}
 
+	for _, f := range dm.filters {
+		v, ok := f.(filter.Viewer)
+		if !ok {
+			continue
+		}
+
+		rendered := v.View()
+
+		if len(rendered) > 0 {
+			rows = append(rows, rendered)
+		}
+	}
+
 	return lipgloss.JoinVertical(
 		lipgloss.Top, append(rows, summary, keyBindings)...,
 	)
+}
+
+func (dm *DirModel) handleKeyBindings(msg tea.KeyMsg) bool {
+	bk := bindingKey(strings.ToLower(msg.String()))
+
+	if bk == toggleNameFilter {
+		if dm.mode == READY {
+			dm.mode = INPUT
+		} else {
+			dm.mode = READY
+		}
+
+		dm.filters.ToggleFilter(filter.NameFilterID)
+	}
+
+	if dm.mode == INPUT {
+		dm.filters.Update(msg)
+		dm.updateTableData()
+
+		return true
+	}
+
+	switch bk {
+	case explore:
+		sr := dm.dirsTable.SelectedRow()
+		if len(sr) < 2 {
+			return true
+		}
+
+		if err := dm.nav.Explore(sr[1]); err != nil {
+			return true
+		}
+	case toggleTopFiles:
+		dm.showTopFiles = !dm.showTopFiles
+		dm.updateSize(dm.width, dm.height)
+	case toggleDirsFilter:
+		dm.filters.ToggleFilter(filter.DirsOnlyFilterID)
+		dm.updateTableData()
+	case toggleFilesFilter:
+		dm.filters.ToggleFilter(filter.FilesOnlyFilterID)
+		dm.updateTableData()
+	}
+
+	return false
 }
 
 func (dm *DirModel) updateTableData() {
@@ -230,16 +274,10 @@ func (dm *DirModel) updateTableData() {
 }
 
 func (dm *DirModel) dirsSummary() string {
-	state := READY
-
-	if dm.nav.Locked() {
-		state = PENDING
-	}
-
 	items := []*BarItem{
 		NewBarItem("PATH", "#FF5F87", 0),
 		NewBarItem(dm.nav.Entry().Path, "", -1),
-		NewBarItem(string(state), "#FF8531", 0),
+		NewBarItem(string(dm.mode), "#FF8531", 0),
 		NewBarItem("SIZE", "#FF5F87", 0),
 		DefaultBarItem(fmtSize(dm.nav.Entry().Size, false)),
 		NewBarItem("DIRS", "#FF5F87", 0),

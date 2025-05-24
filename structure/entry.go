@@ -5,6 +5,7 @@ import (
 	"cmp"
 	"container/heap"
 	"errors"
+	"iter"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -25,7 +26,10 @@ const (
 	bfsQueueSize     = 64
 )
 
-var TopFilesInstance = TopFiles{size: maxTopFiles}
+var (
+	TopFilesInstance = EntrySizeHeap{size: maxTopFiles}
+	TopDirsInstance  = TopDirs{EntrySizeHeap: EntrySizeHeap{size: maxTopFiles}}
+)
 
 // Entry contains the information about a single directory or a file instance
 // within the file system. If the entry represents a directory instance, it has
@@ -105,6 +109,18 @@ func (e *Entry) Ext() string {
 	}
 
 	return strings.ToLower(e.Path[li+1:])
+}
+
+// Entries returns an iterator for the current node's child elements. Depending
+// on the provided argument, the iterator yields either directories or files.
+func (e *Entry) Entries(dirs bool) iter.Seq[*Entry] {
+	return func(yield func(*Entry) bool) {
+		for i := range e.Child {
+			if e.Child[i].IsDir == dirs && !yield(e.Child[i]) {
+				break
+			}
+		}
+	}
 }
 
 // GetChild tries to find a child element by its name. The search will be done

@@ -1,4 +1,5 @@
 # 🧹 NoxDir
+
 [![Build](https://github.com/crumbyte/noxdir/actions/workflows/build.yml/badge.svg)](https://github.com/crumbyte/noxdir/actions/workflows/build.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/crumbyte/noxdir)](https://goreportcard.com/report/github.com/crumbyte/noxdir)
 
@@ -10,29 +11,28 @@ cleanup workflow.
 
 ## 🚀 Features
 
-- ✅ Cross-platform drive and mount point detection (**Windows**, **macOS**, **Linux**)
+- ✅ Cross-platform drive and mount point detection (**Windows**, **macOS**, *
+  *Linux**)
 - 📊 Real-time disk usage insights: used, free, total capacity, and utilization
   percentage
 - 🖥️ Interactive and intuitive terminal interface with keyboard navigation
 - ⚡ Built for speed — uses native system calls for maximum performance
 - 🔒 Fully local and privacy-respecting — **no telemetry**, ever
-- 🧰 Minimal dependencies — single binary, portable
+- 🧰 Single binary, portable
 
-## 📸 Preview
+![full-preview!](/img/full-preview.png "full preview")
 
-Drives list             |  Directories list
-:-------------------------:|:-------------------------:
-![The San Juan Mountains are beautiful!](/img/drives.png "drives list")  |  ![The San Juan Mountains are beautiful!](/img/dirs.png "directories list")
+![two panes!](/img/two-panes.png "two panes")
 
 ## 📦 Installation
 
 ### Pre-compiled Binaries
 
 Obtain the latest optimized binary from
-the [Releases](https://github.com/crumbyte/noxdir/releases) repository. The
+the [Releases](https://github.com/crumbyte/noxdir/releases) page. The
 application is self-contained and requires no installation process.
 
-### Or build from source (Go 1.24+)
+### Build from source (Go 1.24+)
 
 ```bash
 git clone https://github.com/crumbyte/noxdir.git
@@ -50,20 +50,67 @@ Just run in the terminal:
 noxdir
 ```
 
-The interactive interface initializes immediately without configuration requirements.
+The interactive interface initializes immediately without configuration
+requirements.
 
 ## ⚙️ How It Works
 
-- **Windows:** Uses `GetLogicalDrives` and `GetDiskFreeSpaceExW` through direct
-  syscalls for optimal performance.
-- **Linux/macOS:** Uses `statfs` and parses `/proc/mounts` or `mount` command
-  output to find mounted volumes.
+It identifies all available partitions for Windows, or volumes in the case of
+macOS and Linux. It'll immediately show the capacity info for all drives,
+including file system type, total capacity, free space, and usage data. All
+drives will be sorted (by default) by the free space left.
+
+Press `Enter` to explore a particular drive and check what files or directories
+occupy the most space. Wait while the scan is finished, and the status will
+update in the status bar.
+Now you have the full view of the files and directories, including the space
+usage info by each entry. Use `ctrl+q`
+to immediately see the biggest files on the drive, or `ctrl+e` to
+see the biggest directories. Use `ctrl+f` to filter entries by their names or
+`,` and `.` to show only files or directories.
+
+Also, NoxDir accepts flags on a startup. Here's a list of currently available
+CLI flags:
+
+```
+Usage:
+  noxdir [flags]
+
+Flags:
+  -x, --exclude strings   Exclude specific directories from scanning. Useful for directories
+                          with many subdirectories but minimal disk usage (e.g., node_modules).
+
+                          NOTE: The check targets any string occurrence. The excluded directory
+                          name can be either an absolute path or only part of it. In the last case,
+                          all directories whose name contains that string will be excluded from
+                          scanning.
+
+                          Example: --exclude="node_modules,Steam\appcache"
+                          (first rule will exclude all existing "node_modules" directories)
+  -h, --help              help for noxdir
+  -r, --root string       Start from a predefined root directory. Instead of selecting the target
+                          drive and scanning all folders within, a root directory can be provided.
+                          In this case, the scanning will be performed exclusively for the specified
+                          directory, drastically reducing the scanning time.
+
+                          Providing an invalid path results in a blank application output. In this
+                          case, a "backspace" still can be used to return to the drives list. Also, all
+                          trailing slash characters will be removed from the provided path.
+
+                          Example: --root="C:\Program Files (x86)"
+```
+
+## ⚠️ Known Issues
+
+- The scan process on macOS might be slow sometimes. If it is an issue, consider
+  using `--exclude` argument.
+- In some cases, the volumes might duplicate on macOS and Linux. This issue will
+  be fixed in the next releases.
 
 ## 🧩 Planned Features
 
 - [ ] Real-time filesystem event monitoring and interface updates
 - [ ] Exportable reports in various formats (JSON, CSV, HTML)
-- [ ] Comprehensive file management capabilities (deletion, renaming, creation operations)
 - [ ] Sort directories by usage, free space, etc. (already done for
   drives)
 - [ ] Customizable interface aesthetics with theme support
@@ -82,11 +129,10 @@ The interactive interface initializes immediately without configuration requirem
   in our roadmap.
   <br><br>
 - **Q:** The interface appears to have rendering issues with icons or
-  formatting.
+  formatting, and there are no multiple panes like in the screenshots.
 - **A:** Visual presentation depends on terminal capabilities and font
   configuration. For optimal experience, a terminal with Unicode and glyph
-  support is recommended.
-  <br><br>
+  support is recommended. The screenshots were made in `WezTerm` using `MesloLGM Nerd Font` font. 
 
 ## 🧪 Contributing
 

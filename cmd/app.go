@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/crumbyte/noxdir/drive"
+	"github.com/crumbyte/noxdir/filter"
 	"github.com/crumbyte/noxdir/render"
 	"github.com/crumbyte/noxdir/structure"
 
@@ -19,9 +20,10 @@ import (
 var (
 	ErrUnknown = errors.New("unknown error")
 
-	exclude   []string
-	root      string
-	sizeLimit string
+	exclude     []string
+	root        string
+	sizeLimit   string
+	noEmptyDirs bool
 
 	appCmd = &cobra.Command{
 		Use:   "noxdir",
@@ -98,6 +100,23 @@ Example:
 	--size-limit=":1TB"
 `,
 	)
+
+	appCmd.PersistentFlags().BoolVarP(
+		&noEmptyDirs,
+		"no-empty-dirs",
+		"d",
+		false,
+		`Excludes all empty directories from the output. The directory is
+considered empty if it or its subdirectories do not contain any files.
+
+Even if the specific directory represents the entire tree structure of 
+subdirectories, without a single file, it will be completely skipped.
+
+Default value is "false".
+
+Example: --no-empty-dirs (provide a flag)
+`,
+	)
 }
 
 func Execute() {
@@ -152,7 +171,17 @@ func initViewModel() (*render.ViewModel, error) {
 		return nil, err
 	}
 
-	vm := render.NewViewModel(nav)
+	var dirModelFilters []filter.EntryFilter
+
+	if noEmptyDirs {
+		dirModelFilters = append(dirModelFilters, &filter.EmptyDirFilter{})
+	}
+
+	vm := render.NewViewModel(
+		nav,
+		render.NewDriveModel(nav),
+		render.NewDirModel(nav, dirModelFilters...),
+	)
 
 	if root != "" {
 		vm.Update(render.ScanFinished{})

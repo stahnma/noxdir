@@ -11,16 +11,16 @@ import (
 var ansiStyleRegexp = regexp.MustCompile(`\x1b[[\d;]*m`)
 
 func OverlayCenter(fullWidth, fullHeight int, background, overlay string) string {
-	col := fullWidth/2 - (lipgloss.Width(overlay) / 2)
 	row := fullHeight/2 - (lipgloss.Height(overlay) / 2)
+	col := fullWidth/2 - (lipgloss.Width(overlay) / 2)
 
-	return Overlay(fullWidth, background, overlay, col, row)
+	return Overlay(fullWidth, background, overlay, row, col)
 }
 
-func Overlay(fullWidth int, background, overlay string, row, col int) string {
-	wrappedBG := ansi.Hardwrap(background, fullWidth, true)
+func Overlay(_ int, background, overlay string, row, col int) string {
+	// wrappedBG := ansi.Hardwrap(background, fullWidth, true)
 
-	backgroundRows := strings.Split(wrappedBG, "\n")
+	backgroundRows := strings.Split(background, "\n")
 	overlayRows := strings.Split(overlay, "\n")
 
 	for i, overlayRow := range overlayRows {

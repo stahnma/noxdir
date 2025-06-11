@@ -254,10 +254,6 @@ func (dm *DirModel) handleKeyBindings(msg tea.KeyMsg) bool {
 }
 
 func (dm *DirModel) viewChart() string {
-	dialogBoxStyle := lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#874BFD"))
-
 	chartSectors := make([]RawChartSector, 0, len(dm.nav.entry.Child))
 
 	for _, child := range dm.nav.entry.Child {
@@ -271,7 +267,7 @@ func (dm *DirModel) viewChart() string {
 		Chart(
 			dm.width/2,
 			dm.height/2,
-			25,
+			dm.height/2,
 			dm.nav.entry.Size,
 			chartSectors,
 		),

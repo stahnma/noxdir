@@ -32,4 +32,10 @@ var (
 
 	bindKeyStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#ffbf69"))
+
+	dialogBoxStyle = lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240")).
+			BorderRight(false).
+			BorderBottom(false)
 )

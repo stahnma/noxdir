@@ -24,7 +24,7 @@ func Overlay(_ int, background, overlay string, row, col int) string {
 	overlayRows := strings.Split(overlay, "\n")
 
 	for i, overlayRow := range overlayRows {
-		if i+row >= len(backgroundRows) {
+		if i+row >= len(backgroundRows) || i+row < 0 {
 			break
 		}
 

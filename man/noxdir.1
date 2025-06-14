@@ -1,0 +1,91 @@
+.TH NOXDIR 1 "June 2025" "noxdir 0.1.3" "User Commands"
+
+.SH NAME
+noxdir \- a terminal utility for visualizing file system usage.
+
+.SH SYNOPSIS
+.B noxdir
+[\fB-x\fR|\fB--exclude\fR \fISTRINGS\fR]
+[\fB-d\fR|\fB--no-empty-dirs\fR]
+[\fB--no-hidden\fR]
+[\fB-r\fR|\fB--root\fR \fIDIR\fR]
+[\fB-l\fR|\fB--size-limit\fR \fISIZE_RANGE\fR]
+[\fB-h\fR|\fB--help\fR]
+
+.SH DESCRIPTION
+.B NoxDir
+is a terminal-based user interface for visualizing and analyzing disk space usage across drives and volumes. It scans all directories and files on the selected drive and presents the space consumption in a clear, user-friendly layout.
+.SH OPTIONS
+.TP
+.BR -x ", " --exclude " " \fISTRINGS\fR
+Exclude specific directories from scanning. Useful for directories with many subdirectories but minimal disk usage (e.g., node_modules). The check targets any string occurrence. The excluded directory name can be either an absolute path or only part of it. In the latter case, all directories whose name contains that string will be excluded from scanning.
+
+Example: \fB--exclude="node_modules,Steam\\appcache"\fR
+
+.TP
+.BR -d ", " --no-empty-dirs
+Excludes all empty directories from the output. A directory is considered empty if it and all its subdirectories contain no files. Even if a directory represents an entire subtree without files, it will be skipped.
+
+Default: false
+Example: \fB--no-empty-dirs\fR
+
+.TP
+.BR --no-hidden
+Excludes all hidden files and directories. Entries are considered hidden if their names start with a dot (e.g., \fB.git\fR).
+
+Default: false
+Example: \fB--no-hidden\fR
+
+.TP
+.BR -r ", " --root " " \fIDIR\fR
+Start from a predefined root directory instead of selecting a drive. Scanning will only be performed within this directory. Trailing slashes are stripped. An invalid path results in blank output, but you can return using backspace.
+
+Example: \fB--root="C:\\Program Files (x86)"\fR
+
+.TP
+.BR -l ", " --size-limit " " \fISIZE_RANGE\fR
+Define size limits for files to include in scanning results. Files outside the defined range are skipped. The format is \fB<size><unit>:<size><unit>\fR where units can be: KB, MB, GB, TB, PB. You can specify:
+- Both bounds: \fB1GB:5GB\fR
+- Lower bound only: \fB3MB:\fR
+- Upper bound only: \fB:10GB\fR
+
+NOTE: Using this flag leads to inaccurate total sizes for directories (filtered files only).
+
+\fIExamples:\fR
+.RS 14
+.IP \(bu 2
+--size-limit="3GB:20GB"
+.IP \(bu 2
+--size-limit="3MB:"
+.IP \(bu 2
+--size-limit=":1TB"
+.RE
+
+.TP
+.BR -h ", " --help
+Show help and usage information.
+
+.SH EXAMPLES
+
+.TP
+Scan a drive interactively:
+.B noxdir
+
+.TP
+Start app from the current root:
+.B noxdir -r .
+
+.TP
+Exclude node_modules and Steam cache folders:
+.B noxdir --exclude="node_modules,Steam"
+
+.TP
+Only show files between 10MB and 1GB:
+.B noxdir --size-limit="10MB:1GB"
+
+.TP
+Skip empty and hidden directories:
+.B noxdir --no-empty-dirs --no-hidden
+
+.SH AUTHOR
+crumbyte (https://github.com/crumbyte)

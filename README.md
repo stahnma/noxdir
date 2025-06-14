@@ -158,12 +158,8 @@ Flags:
 - **A:** Not yet — it's designed for interactive use.
   <br><br>
 - **Q:** What are the security implications of running NoxDir?
-- **A:** NoxDir operates in a strictly read-only capacity with no file
-  modification capabilities in the current release.
-  <br><br>
-- Q: Does NoxDir support file management operations?
-- A: File manipulation features are currently under development and prioritized
-  in our roadmap.
+- **A:** NoxDir operates in a strictly read-only capacity, with no file
+  modification capabilities except for deletion, which requires confirmation.
   <br><br>
 - **Q:** The interface appears to have rendering issues with icons or
   formatting, and there are no multiple panes like in the screenshots.

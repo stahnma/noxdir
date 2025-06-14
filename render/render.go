@@ -16,7 +16,7 @@ import (
 	"github.com/muesli/termenv"
 )
 
-const Version = "v0.1.2"
+const Version = "v0.1.3"
 
 const updateTickerInterval = time.Millisecond * 500
 

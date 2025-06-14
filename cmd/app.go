@@ -149,17 +149,6 @@ func Execute() {
 }
 
 func runApp(_ *cobra.Command, _ []string) error {
-	defer func() {
-		if r := recover(); r != nil {
-			err, ok := r.(error)
-			if !ok {
-				err = ErrUnknown
-			}
-
-			printError(render.ReportError(err, debug.Stack()))
-		}
-	}()
-
 	vm, err := initViewModel()
 	if err != nil {
 		return err
@@ -170,10 +159,19 @@ func runApp(_ *cobra.Command, _ []string) error {
 		tea.WithAltScreen(),
 		tea.WithoutCatchPanics(),
 	)
+
 	defer func() {
-		// can't really do anything and dumping more text, makes it
-		// less legible.
-		_ = teaProg.ReleaseTerminal()
+		if r := recover(); r != nil {
+			var ok bool
+
+			_ = teaProg.ReleaseTerminal()
+
+			if err, ok = r.(error); !ok {
+				err = ErrUnknown
+			}
+
+			printError(render.ReportError(err, debug.Stack()))
+		}
 	}()
 
 	render.SetTeaProgram(teaProg)

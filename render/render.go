@@ -66,11 +66,11 @@ func (vm *ViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			vm.refresh()
 		case quit, cancel:
 			return vm, tea.Quit
-		case enter:
+		case enter, right:
 			if vm.dirModel.mode != DELETE || vm.nav.OnDrives() {
 				vm.levelDown()
 			}
-		case backspace:
+		case backspace, left:
 			if vm.dirModel.mode != DELETE || vm.nav.OnDrives() {
 				vm.levelUp()
 			}

@@ -61,6 +61,7 @@ homebrew_casks:
       owner: crumbyte
       name: homebrew-noxdir
       branch: main
+      token: "{{ .Env.GH_PAT }}"
 
 changelog:
   sort: asc

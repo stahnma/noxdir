@@ -93,7 +93,7 @@ var drivesKeyMap = [][]key.Binding{
 		key.NewBinding(
 			key.WithKeys(enter.String(), right.String()),
 			key.WithHelp(
-				bindKeyStyle.Render(enter.String()+"/"+right.String()),
+				bindKeyStyle.Render("→/"+enter.String()),
 				helpDescStyle.Render(" - open drive"),
 			),
 		),
@@ -129,14 +129,14 @@ var dirsKeyMap = [][]key.Binding{
 		key.NewBinding(
 			key.WithKeys(enter.String()),
 			key.WithHelp(
-				bindKeyStyle.Render(enter.String()+"/"+right.String()),
+				bindKeyStyle.Render("→/"+enter.String()),
 				helpDescStyle.Render(" - open dir"),
 			),
 		),
 		key.NewBinding(
 			key.WithKeys(backspace.String(), left.String()),
 			key.WithHelp(
-				bindKeyStyle.Render(backspace.String()+"/"+left.String()),
+				bindKeyStyle.Render("←/"+backspace.String()),
 				helpDescStyle.Render(" - back"),
 			),
 		),

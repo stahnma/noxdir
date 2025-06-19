@@ -1,7 +1,6 @@
 package render
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/crumbyte/noxdir/drive"
@@ -153,7 +152,7 @@ func (dm *DriveModel) updateTableData(key drive.SortKey, sortDesc bool) {
 			FmtSize(d.TotalBytes, driveSizeWidth),
 			FmtSize(d.UsedBytes, driveSizeWidth),
 			FmtSize(d.FreeBytes, driveSizeWidth),
-			strconv.FormatFloat(d.UsedPercent, 'f', 2, 64) + " %",
+			FmtUsage(d.UsedPercent / 100),
 			lipgloss.JoinHorizontal(
 				lipgloss.Top,
 				strings.Repeat(" ", progressWidth-lipgloss.Width(pgBar)),

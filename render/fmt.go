@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -47,7 +48,7 @@ func unitFmt(val uint64) string {
 	return strconv.FormatUint(val, 10)
 }
 
-func fmtName(name string, maxWidth int) string {
+func FmtName(name string, maxWidth int) string {
 	nameWrap := lipgloss.NewStyle().MaxWidth(maxWidth - 5).Render(name)
 
 	if lipgloss.Width(nameWrap) == maxWidth-5 {
@@ -55,4 +56,15 @@ func fmtName(name string, maxWidth int) string {
 	}
 
 	return nameWrap
+}
+
+func FmtUsage(usage float64) string {
+	minWidth := 8
+	usageFmt := strconv.FormatFloat(usage*100, 'f', 2, 64) + " %"
+
+	return fmt.Sprintf(
+		"%s%s",
+		strings.Repeat(" ", max(0, minWidth-len(usageFmt))),
+		usageFmt,
+	)
 }

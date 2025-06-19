@@ -101,7 +101,7 @@ func prepareSectors(totalSize int64, rawSectors []RawChartSector) []chartSector 
 		sectors = append(
 			sectors,
 			chartSector{
-				label: fmtName(s.Label, chartLabelWidth),
+				label: FmtName(s.Label, chartLabelWidth),
 				size:  s.Size,
 				usage: usage,
 			},
@@ -135,7 +135,7 @@ func legend(sectors []chartSector, width int) string {
 	listPadding := 5
 
 	for _, s := range sectors {
-		label := fmtName(s.label, int(float64(width)*0.6))
+		label := FmtName(s.label, int(float64(width)*0.6))
 		size := FmtSize(s.size, 0)
 
 		padding := strings.Repeat(

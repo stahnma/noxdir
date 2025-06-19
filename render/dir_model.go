@@ -348,20 +348,19 @@ func (dm *DirModel) updateTableData() {
 	colWidth := int(float64(dm.width-iconWidth-nameWidth) * colWidthRatio)
 	progressWidth := dm.width - (colWidth * 5) - iconWidth - nameWidth
 
-	if len(dm.dirsTable.Columns()) == 0 {
-		columns := make([]table.Column, len(dm.columns))
+	// columns must be re-rendered ech time to support window resize
+	columns := make([]table.Column, len(dm.columns))
 
-		for i, c := range dm.columns {
-			columns[i] = table.Column{Title: c.Title, Width: colWidth}
-		}
-
-		columns[0].Width = iconWidth
-		columns[1].Width = 0
-		columns[2].Width = nameWidth
-		columns[len(columns)-1].Width = progressWidth
-
-		dm.dirsTable.SetColumns(columns)
+	for i, c := range dm.columns {
+		columns[i] = table.Column{Title: c.Title, Width: colWidth}
 	}
+
+	columns[0].Width = iconWidth
+	columns[1].Width = 0
+	columns[2].Width = nameWidth
+	columns[len(columns)-1].Width = progressWidth
+
+	dm.dirsTable.SetColumns(columns)
 
 	fillProgress := NewProgressBar(progressWidth, '🟥', ' ')
 
@@ -388,12 +387,12 @@ func (dm *DirModel) updateTableData() {
 			table.Row{
 				EntryIcon(child),
 				child.Name(),
-				fmtName(child.Name(), nameWidth),
+				FmtName(child.Name(), nameWidth),
 				FmtSize(child.Size, entrySizeWidth),
 				totalDirs,
 				totalFiles,
 				time.Unix(child.ModTime, 0).Format("2006-01-02 15:04"),
-				strconv.FormatFloat(parentUsage*100, 'f', 2, 64) + " %",
+				FmtUsage(parentUsage),
 				pgBar,
 			},
 		)

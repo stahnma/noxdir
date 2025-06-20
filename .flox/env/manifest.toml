@@ -77,6 +77,8 @@ go.pkg-path = "go"
 
 [build.noxdir]
 command = "mkdir -p $out/bin && go build -trimpath . ; mv noxdir $out/bin/noxdir"
+version = "v0.1.3-10"
+description = "noxdir is a storage visualation tool for the CLI"
 
 
 ## Other Environment Options -----------------------------------------

@@ -71,7 +71,7 @@ func (ddm *DeleteDialogModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (ddm *DeleteDialogModel) View() string {
-	cancelBtn, confirmBtn := activeButtonStyle, confirmButtonStyle
+	cancelBtn, confirmBtn := style.ActiveButton(), style.ConfirmButton()
 
 	if ddm.choice == ConfirmChoice {
 		cancelBtn, confirmBtn = confirmBtn, cancelBtn
@@ -94,7 +94,7 @@ func (ddm *DeleteDialogModel) View() string {
 		confirmBtn.Render("Yes"),
 	)
 
-	return dialogBoxStyle.Render(
+	return style.DialogBox().Render(
 		lipgloss.JoinVertical(
 			lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Top, confirm, target),

@@ -34,188 +34,198 @@ const (
 	right             bindingKey = "right"
 )
 
-var toggleHelpBinding = key.NewBinding(
-	key.WithKeys(toggleHelp.String()),
-	key.WithHelp(
-		bindKeyStyle.Render(toggleHelp.String()),
-		helpDescStyle.Render(" - toggle full help"),
-	),
-)
-
-var navigateKeyMap = [][]key.Binding{
-	{
-		key.NewBinding(
-			key.WithKeys("up", "k"),
-			key.WithHelp(
-				bindKeyStyle.Render("↑/k"),
-				helpDescStyle.Render(" - up"),
-			),
+func ToggleHelpBinding() key.Binding {
+	return key.NewBinding(
+		key.WithKeys(toggleHelp.String()),
+		key.WithHelp(
+			style.BindKey().Render(toggleHelp.String()),
+			style.Help().Render(" - toggle full help"),
 		),
-		key.NewBinding(
-			key.WithKeys("down", "j"),
-			key.WithHelp(
-				bindKeyStyle.Render("↓/j"),
-				helpDescStyle.Render(" - down"),
-			),
-		),
-		key.NewBinding(
-			key.WithKeys("home", "g"),
-			key.WithHelp(
-				bindKeyStyle.Render("g/home"),
-				helpDescStyle.Render(" - go to start"),
-			),
-		),
-		key.NewBinding(
-			key.WithKeys("end", "G"),
-			key.WithHelp(
-				bindKeyStyle.Render("G/end"),
-				helpDescStyle.Render(" - go to end"),
-			),
-		),
-	},
+	)
 }
 
-var shortHelp = append(navigateKeyMap[0], toggleHelpBinding)
-
-var drivesKeyMap = [][]key.Binding{
-	{
-		key.NewBinding(
-			key.WithKeys(
-				sortTotalCap.String(),
-				sortTotalUsed.String(),
-				sortTotalFree.String(),
+func NavigateKeyMap() [][]key.Binding {
+	return [][]key.Binding{
+		{
+			key.NewBinding(
+				key.WithKeys("up", "k"),
+				key.WithHelp(
+					style.BindKey().Render("↑/k"),
+					style.Help().Render(" - up"),
+				),
 			),
-			key.WithHelp(
-				bindKeyStyle.Render("alt+(t/f/u/g)"),
-				helpDescStyle.Render(" - sort total/free/used/usage"),
+			key.NewBinding(
+				key.WithKeys("down", "j"),
+				key.WithHelp(
+					style.BindKey().Render("↓/j"),
+					style.Help().Render(" - down"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(enter.String(), right.String()),
-			key.WithHelp(
-				bindKeyStyle.Render("→/"+enter.String()),
-				helpDescStyle.Render(" - open drive"),
+			key.NewBinding(
+				key.WithKeys("home", "g"),
+				key.WithHelp(
+					style.BindKey().Render("g/home"),
+					style.Help().Render(" - go to start"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(explore.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(explore.String()),
-				helpDescStyle.Render(" - explore drive"),
+			key.NewBinding(
+				key.WithKeys("end", "G"),
+				key.WithHelp(
+					style.BindKey().Render("G/end"),
+					style.Help().Render(" - go to end"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(quit.String(), cancel.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(quit.String()+"/"+cancel.String()),
-				helpDescStyle.Render(" - quit"),
-			),
-		),
-	},
-	{
-		toggleHelpBinding,
-		key.NewBinding(
-			key.WithKeys(refresh.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(refresh.String()),
-				helpDescStyle.Render(" - refresh"),
-			),
-		),
-	},
+		},
+	}
 }
 
-var dirsKeyMap = [][]key.Binding{
-	{
-		key.NewBinding(
-			key.WithKeys(enter.String()),
-			key.WithHelp(
-				bindKeyStyle.Render("→/"+enter.String()),
-				helpDescStyle.Render(" - open dir"),
+func ShortHelp() []key.Binding {
+	return append(NavigateKeyMap()[0], ToggleHelpBinding())
+}
+
+func DrivesKeyMap() [][]key.Binding {
+	return [][]key.Binding{
+		{
+			key.NewBinding(
+				key.WithKeys(
+					sortTotalCap.String(),
+					sortTotalUsed.String(),
+					sortTotalFree.String(),
+				),
+				key.WithHelp(
+					style.BindKey().Render("alt+(t/f/u/g)"),
+					style.Help().Render(" - sort total/free/used/usage"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(backspace.String(), left.String()),
-			key.WithHelp(
-				bindKeyStyle.Render("←/"+backspace.String()),
-				helpDescStyle.Render(" - back"),
+			key.NewBinding(
+				key.WithKeys(enter.String(), right.String()),
+				key.WithHelp(
+					style.BindKey().Render("→/"+enter.String()),
+					style.Help().Render(" - open drive"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(explore.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(explore.String()),
-				helpDescStyle.Render(" - explore dir/file"),
+			key.NewBinding(
+				key.WithKeys(explore.String()),
+				key.WithHelp(
+					style.BindKey().Render(explore.String()),
+					style.Help().Render(" - explore drive"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(quit.String(), cancel.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(quit.String()+"/"+cancel.String()),
-				helpDescStyle.Render(" - quit"),
+			key.NewBinding(
+				key.WithKeys(quit.String(), cancel.String()),
+				key.WithHelp(
+					style.BindKey().Render(quit.String()+"/"+cancel.String()),
+					style.Help().Render(" - quit"),
+				),
 			),
-		),
-	},
-	{
-		key.NewBinding(
-			key.WithKeys(toggleTopFiles.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(toggleTopFiles.String()),
-				helpDescStyle.Render(" - toggle top files"),
+		},
+		{
+			ToggleHelpBinding(),
+			key.NewBinding(
+				key.WithKeys(refresh.String()),
+				key.WithHelp(
+					style.BindKey().Render(refresh.String()),
+					style.Help().Render(" - refresh"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(toggleTopDirs.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(toggleTopDirs.String()),
-				helpDescStyle.Render(" - toggle top dirs"),
+		},
+	}
+}
+
+func DirsKeyMap() [][]key.Binding {
+	return [][]key.Binding{
+		{
+			key.NewBinding(
+				key.WithKeys(enter.String()),
+				key.WithHelp(
+					style.BindKey().Render("→/"+enter.String()),
+					style.Help().Render(" - open dir"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(toggleNameFilter.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(toggleNameFilter.String()),
-				helpDescStyle.Render(" - toggle name filter"),
+			key.NewBinding(
+				key.WithKeys(backspace.String(), left.String()),
+				key.WithHelp(
+					style.BindKey().Render("←/"+backspace.String()),
+					style.Help().Render(" - back"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(toggleChart.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(toggleChart.String()),
-				helpDescStyle.Render(" - usage chart"),
+			key.NewBinding(
+				key.WithKeys(explore.String()),
+				key.WithHelp(
+					style.BindKey().Render(explore.String()),
+					style.Help().Render(" - explore dir/file"),
+				),
 			),
-		),
-	},
-	{
-		key.NewBinding(
-			key.WithKeys(toggleDirsFilter.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(toggleDirsFilter.String()),
-				helpDescStyle.Render(" - toggle dirs only"),
+			key.NewBinding(
+				key.WithKeys(quit.String(), cancel.String()),
+				key.WithHelp(
+					style.BindKey().Render(quit.String()+"/"+cancel.String()),
+					style.Help().Render(" - quit"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(toggleFilesFilter.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(toggleFilesFilter.String()),
-				helpDescStyle.Render(" - toggle files only"),
+		},
+		{
+			key.NewBinding(
+				key.WithKeys(toggleTopFiles.String()),
+				key.WithHelp(
+					style.BindKey().Render(toggleTopFiles.String()),
+					style.Help().Render(" - toggle top files"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(refresh.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(refresh.String()),
-				helpDescStyle.Render(" - refresh"),
+			key.NewBinding(
+				key.WithKeys(toggleTopDirs.String()),
+				key.WithHelp(
+					style.BindKey().Render(toggleTopDirs.String()),
+					style.Help().Render(" - toggle top dirs"),
+				),
 			),
-		),
-		key.NewBinding(
-			key.WithKeys(remove.String()),
-			key.WithHelp(
-				bindKeyStyle.Render(remove.String()),
-				helpDescStyle.Render(" - delete"),
+			key.NewBinding(
+				key.WithKeys(toggleNameFilter.String()),
+				key.WithHelp(
+					style.BindKey().Render(toggleNameFilter.String()),
+					style.Help().Render(" - toggle name filter"),
+				),
 			),
-		),
-	},
-	{
-		toggleHelpBinding,
-	},
+			key.NewBinding(
+				key.WithKeys(toggleChart.String()),
+				key.WithHelp(
+					style.BindKey().Render(toggleChart.String()),
+					style.Help().Render(" - usage chart"),
+				),
+			),
+		},
+		{
+			key.NewBinding(
+				key.WithKeys(toggleDirsFilter.String()),
+				key.WithHelp(
+					style.BindKey().Render(toggleDirsFilter.String()),
+					style.Help().Render(" - toggle dirs only"),
+				),
+			),
+			key.NewBinding(
+				key.WithKeys(toggleFilesFilter.String()),
+				key.WithHelp(
+					style.BindKey().Render(toggleFilesFilter.String()),
+					style.Help().Render(" - toggle files only"),
+				),
+			),
+			key.NewBinding(
+				key.WithKeys(refresh.String()),
+				key.WithHelp(
+					style.BindKey().Render(refresh.String()),
+					style.Help().Render(" - refresh"),
+				),
+			),
+			key.NewBinding(
+				key.WithKeys(remove.String()),
+				key.WithHelp(
+					style.BindKey().Render(remove.String()),
+					style.Help().Render(" - delete"),
+				),
+			),
+		},
+		{
+			ToggleHelpBinding(),
+		},
+	}
 }

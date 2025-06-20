@@ -129,6 +129,7 @@ linters:
     funlen:
       lines: 100
       statements: 40
+      ignore-comments: true
 
     gochecksumtype:
       default-signifies-exhaustive: true
@@ -244,6 +245,8 @@ linters:
       - std-error-handling
       - common-false-positives
     rules:
+      - source: 'init'
+        linters: [funlen]
       - source: 'TODO'
         linters: [ godot ]
       - text: 'should have a package comment'

@@ -95,11 +95,11 @@ func (dm *DriveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (dm *DriveModel) View() string {
 	h := lipgloss.Height
 	summary := dm.drivesSummary()
-	keyBindings := dm.drivesTable.Help.ShortHelpView(shortHelp)
+	keyBindings := dm.drivesTable.Help.ShortHelpView(ShortHelp())
 
 	if dm.fullHelp {
 		keyBindings = dm.drivesTable.Help.FullHelpView(
-			append(navigateKeyMap, drivesKeyMap...),
+			append(NavigateKeyMap(), DrivesKeyMap()...),
 		)
 	}
 
@@ -169,19 +169,20 @@ func (dm *DriveModel) drivesSummary() string {
 	dl := dm.nav.DrivesList()
 
 	items := []*BarItem{
-		NewBarItem(Version, "#8338ec", 0),
-		NewBarItem("MODE", "#FF5F87", 0),
+		NewBarItem(Version, style.CS().StatusBar.VersionBG, 0),
+		NewBarItem("MODE", style.CS().StatusBar.Drives.ModeBG, 0),
 		NewBarItem("Drives List", "", -1),
-		NewBarItem("CAPACITY", "#FF5F87", 0),
+		NewBarItem("CAPACITY", style.CS().StatusBar.Drives.CapacityBG, 0),
 		DefaultBarItem(FmtSize(dl.TotalCapacity, 0)),
-		NewBarItem("FREE", "#FF5F87", 0),
+		NewBarItem("FREE", style.CS().StatusBar.Drives.FreeBG, 0),
 		DefaultBarItem(FmtSize(dl.TotalFree, 0)),
-		NewBarItem("USED", "#FF5F87", 0),
+		NewBarItem("USED", style.CS().StatusBar.Drives.UsedBG, 0),
 		DefaultBarItem(FmtSize(dl.TotalUsed, 0)),
 	}
 
-	return statusBarStyle.Margin(1, 0, 1, 0).
-		Render(NewStatusBar(items, dm.width))
+	return style.StatusBar().Margin(1, 0, 1, 0).Render(
+		NewStatusBar(items, dm.width),
+	)
 }
 
 func (dm *DriveModel) sortDrives(sortKey drive.SortKey) {

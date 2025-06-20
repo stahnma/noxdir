@@ -103,31 +103,32 @@ func NewStatusBar(items []*BarItem, totalWidth int) string {
 	}
 
 	for i := range items {
-		style := styles[i]
+		s := styles[i]
 
 		if _, ok := toMaxWidth[i]; ok {
-			style = style.Width(min(totalWidth, maxItemWidth))
+			s = s.Width(min(totalWidth, maxItemWidth))
 
-			totalWidth -= style.GetWidth()
+			totalWidth -= s.GetWidth()
 		}
 
-		renderItems = append(renderItems, style.Render(items[i].content))
+		renderItems = append(renderItems, s.Render(items[i].content))
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, renderItems...)
 }
 
 func newBarBlockStyle(bi *BarItem) lipgloss.Style {
-	style := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FFFDF5")).
-		Background(lipgloss.Color(bi.bgColor)).
-		Padding(0, 1)
+	s := style.BarBlock(lipgloss.Color(bi.bgColor))
 
 	if bi.border != 0 {
-		style = style.Border(
-			lipgloss.Border{Right: string(bi.border)}, false, true, false, false).
-			BorderForeground(lipgloss.Color(bi.bgColor))
+		s = s.Border(
+			lipgloss.Border{Right: string(bi.border)},
+			false,
+			true,
+			false,
+			false,
+		).BorderForeground(lipgloss.Color(bi.bgColor))
 	}
 
-	return style
+	return s
 }

@@ -21,11 +21,12 @@ import (
 var (
 	ErrUnknown = errors.New("unknown error")
 
-	exclude     []string
-	root        string
-	sizeLimit   string
-	noEmptyDirs bool
-	noHidden    bool
+	exclude         []string
+	root            string
+	sizeLimit       string
+	noEmptyDirs     bool
+	noHidden        bool
+	colorSchemaPath string
 
 	appCmd = &cobra.Command{
 		Use:   "noxdir",
@@ -132,6 +133,16 @@ Default value is "false".
 Example: --no-hidden (provide a flag)
 `,
 	)
+
+	appCmd.PersistentFlags().StringVarP(
+		&colorSchemaPath,
+		"color-schema",
+		"",
+		"",
+		`Set the color schema configuration file. The file contains a custom
+color settings for the UI elements.
+`,
+	)
 }
 
 func Execute() {
@@ -149,6 +160,10 @@ func Execute() {
 }
 
 func runApp(_ *cobra.Command, _ []string) error {
+	if err := initColorSchema(); err != nil {
+		return err
+	}
+
 	vm, err := initViewModel()
 	if err != nil {
 		return err
@@ -257,4 +272,19 @@ func printError(errMsg string) {
 	if _, err := os.Stdout.WriteString(errMsg + "\n"); err != nil {
 		return
 	}
+}
+
+func initColorSchema() error {
+	cs := render.DefaultColorSchema()
+
+	if len(colorSchemaPath) != 0 {
+		err := render.DecodeFileColorSchema(colorSchemaPath, &cs)
+		if err != nil {
+			return err
+		}
+	}
+
+	render.InitStyle(cs)
+
+	return nil
 }

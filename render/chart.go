@@ -14,16 +14,16 @@ const (
 	aspectFix       = 2.4
 )
 
-var chartColors = []lipgloss.Color{
-	lipgloss.Color("#ffbe0b"),
-	lipgloss.Color("#fb5607"),
-	lipgloss.Color("#ff006e"),
-	lipgloss.Color("#8338ec"),
-	lipgloss.Color("#3a86ff"),
-	lipgloss.Color("#00f5d4"),
-	lipgloss.Color("#fef9ef"),
-	lipgloss.Color("#ff85a1"),
-	lipgloss.Color("#b5838d"),
+var defaultChartColors = []lipgloss.Color{
+	"#ffbe0b",
+	"#fb5607",
+	"#ff006e",
+	"#8338ec",
+	"#3a86ff",
+	"#00f5d4",
+	"#fef9ef",
+	"#ff85a1",
+	"#b5838d",
 }
 
 type RawChartSector struct {
@@ -40,10 +40,14 @@ type chartSector struct {
 	endAngle   float64
 }
 
-func Chart(width, height, radius int, totalSize int64, raw []RawChartSector) string {
+func Chart(width, height, radius int, totalSize int64, raw []RawChartSector, colors []lipgloss.Color) string {
 	sb := strings.Builder{}
 
-	sectors := prepareSectors(totalSize, raw)
+	if len(colors) < 9 {
+		colors = defaultChartColors
+	}
+
+	sectors := prepareSectors(totalSize, raw, colors)
 
 	centerX, centerY := width/2/2, height/2
 
@@ -84,7 +88,7 @@ func Chart(width, height, radius int, totalSize int64, raw []RawChartSector) str
 	)
 }
 
-func prepareSectors(totalSize int64, rawSectors []RawChartSector) []chartSector {
+func prepareSectors(totalSize int64, rawSectors []RawChartSector, colors []lipgloss.Color) []chartSector {
 	sectors := make([]chartSector, 0, len(rawSectors))
 
 	others := chartSector{label: "Others"}
@@ -120,7 +124,7 @@ func prepareSectors(totalSize int64, rawSectors []RawChartSector) []chartSector 
 	start := 0.0
 
 	for i := range sectors {
-		sectors[i].color = chartColors[i]
+		sectors[i].color = colors[i]
 		sectors[i].startAngle = start
 		sectors[i].endAngle = start + sectors[i].usage*2*math.Pi
 

@@ -22,7 +22,7 @@ func EntryIcon(e *structure.Entry) string {
 		icon = "💻"
 	case "jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff":
 		icon = "🖼"
-	case "mp4", "mkv", "avi", "mov", "webm", "m4v", "wmv":
+	case "mp4", "mkv", "avi", "mov", "webm", "m4v", "wmv", "flv":
 		icon = "🎞"
 	case "json", "csv", "xml", "env", "yml", "yaml", "ini":
 		icon = "🔧"

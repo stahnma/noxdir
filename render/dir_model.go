@@ -80,15 +80,15 @@ func NewDirModel(nav *Navigation, filters ...filter.EntryFilter) *DirModel {
 		nav:           nav,
 	}
 
-	style := table.DefaultStyles()
-	style.Header = TopHeaderStyle
-	style.Cell = lipgloss.NewStyle()
-	style.Selected = lipgloss.NewStyle()
+	s := table.DefaultStyles()
+	s.Header = *style.TopTableHeader()
+	s.Cell = lipgloss.NewStyle()
+	s.Selected = lipgloss.NewStyle()
 
-	dm.topFilesTable.SetStyles(style)
+	dm.topFilesTable.SetStyles(s)
 	dm.topFilesTable.SetHeight(topFilesTableHeight)
 
-	dm.topDirsTable.SetStyles(style)
+	dm.topDirsTable.SetStyles(s)
 	dm.topDirsTable.SetHeight(topFilesTableHeight)
 
 	return dm
@@ -155,11 +155,11 @@ func (dm *DirModel) View() string {
 	h := lipgloss.Height
 
 	summary := dm.dirsSummary()
-	keyBindings := dm.dirsTable.Help.ShortHelpView(shortHelp)
+	keyBindings := dm.dirsTable.Help.ShortHelpView(ShortHelp())
 
 	if dm.fullHelp {
 		keyBindings = dm.dirsTable.Help.FullHelpView(
-			append(navigateKeyMap, dirsKeyMap...),
+			append(NavigateKeyMap(), DirsKeyMap()...),
 		)
 	}
 
@@ -295,13 +295,14 @@ func (dm *DirModel) viewChart() string {
 		})
 	}
 
-	return chartBoxStyle.Render(
+	return style.ChartBox().Render(
 		Chart(
 			dm.width/2,
 			dm.height/2,
 			dm.height/2,
 			dm.nav.entry.Size,
 			chartSectors,
+			style.ChartColors(),
 		),
 	)
 }
@@ -404,22 +405,23 @@ func (dm *DirModel) updateTableData() {
 
 func (dm *DirModel) dirsSummary() string {
 	items := []*BarItem{
-		NewBarItem(Version, "#8338ec", 0),
-		NewBarItem("PATH", "#FF5F87", 0),
+		NewBarItem(Version, style.cs.StatusBar.VersionBG, 0),
+		NewBarItem("PATH", style.cs.StatusBar.Dirs.PathBG, 0),
 		NewBarItem(dm.nav.Entry().Path, "", -1),
-		NewBarItem(string(dm.mode), "#FF8531", 0),
-		NewBarItem("SIZE", "#FF5F87", 0),
+		NewBarItem(string(dm.mode), style.cs.StatusBar.Dirs.ModeBG, 0),
+		NewBarItem("SIZE", style.cs.StatusBar.Dirs.SizeBG, 0),
 		DefaultBarItem(FmtSize(dm.nav.Entry().Size, 0)),
-		NewBarItem("DIRS", "#FF5F87", 0),
+		NewBarItem("DIRS", style.cs.StatusBar.Dirs.DirsBG, 0),
 		DefaultBarItem(unitFmt(dm.nav.Entry().LocalDirs)),
-		NewBarItem("FILES", "#FF5F87", 0),
+		NewBarItem("FILES", style.cs.StatusBar.Dirs.FilesBG, 0),
 		DefaultBarItem(unitFmt(dm.nav.Entry().LocalFiles)),
-		NewBarItem("ERRORS", "#FF303E", 0),
+		NewBarItem("ERRORS", style.cs.StatusBar.Dirs.ErrorBG, 0),
 		DefaultBarItem(unitFmt(uint64(len(dm.lastErr)))),
 	}
 
-	return statusBarStyle.Margin(1, 0, 1, 0).
-		Render(NewStatusBar(items, dm.width))
+	return style.StatusBar().Margin(1, 0, 1, 0).Render(
+		NewStatusBar(items, dm.width),
+	)
 }
 
 func (dm *DirModel) fillTopEntries(entries heap.Interface, tm *table.Model) {
@@ -465,7 +467,7 @@ func (dm *DirModel) fillTopEntries(entries heap.Interface, tm *table.Model) {
 		rows[i] = table.Row{
 			EntryIcon(file),
 			file.Path,
-			path + topFileStyle.Render(file.Name()),
+			path + style.TopFiles().Render(file.Name()),
 			FmtSize(file.Size, entrySizeWidth),
 			time.Unix(file.ModTime, 0).Format("2006-01-02 15:04"),
 		}

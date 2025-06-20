@@ -9,6 +9,8 @@ import (
 )
 
 func TestNewStatusBar(t *testing.T) {
+	render.InitStyle(render.DefaultColorSchema())
+
 	t.Run("default", func(t *testing.T) {
 		items := []*render.BarItem{
 			render.NewBarItem("1", "#000", 0),

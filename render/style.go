@@ -1,55 +1,222 @@
 package render
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"sync"
+
+	"github.com/charmbracelet/lipgloss"
+)
 
 var (
-	TableHeaderStyle = lipgloss.NewStyle().
-				Bold(true).
-				BorderStyle(lipgloss.ThickBorder()).
-				BorderForeground(lipgloss.Color("240")).
-				BorderBottom(true)
+	styleOnce sync.Once
+	style     *Style
+)
 
-	TopHeaderStyle = lipgloss.NewStyle().
-			Inherit(TableHeaderStyle).
+type Style struct {
+	cache map[string]*lipgloss.Style
+	cs    ColorSchema
+}
+
+func InitStyle(cs ColorSchema) *Style {
+	styleOnce.Do(func() {
+		style = &Style{
+			cs:    cs,
+			cache: make(map[string]*lipgloss.Style),
+		}
+	})
+
+	return style
+}
+
+func (s *Style) CS() *ColorSchema {
+	return &s.cs
+}
+
+func (s *Style) TableHeader() *lipgloss.Style {
+	cv, ok := s.cache["tableHeader"]
+	if !ok {
+		cs := lipgloss.NewStyle().
+			Bold(true).
+			BorderStyle(lipgloss.ThickBorder()).
+			BorderForeground(lipgloss.Color(s.cs.TableHeaderBorder)).
+			BorderBottom(true)
+
+		s.cache["tableHeader"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) TopTableHeader() *lipgloss.Style {
+	cv, ok := s.cache["topTable"]
+	if !ok {
+		cs := lipgloss.NewStyle().
+			Inherit(*s.TableHeader()).
 			BorderTop(true).
 			BorderStyle(lipgloss.NormalBorder())
 
-	SelectedRowStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#262626")).
-				Background(lipgloss.Color("#ebbd34")).
-				Bold(false)
+		s.cache["topTable"] = &cs
 
-	statusBarStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
-			Background(lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#353533"})
+		return &cs
+	}
 
-	topFileStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#ebbd34")).
+	return cv
+}
+
+func (s *Style) SelectedRow() *lipgloss.Style {
+	cv, ok := s.cache["selectedRow"]
+	if !ok {
+		cs := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(s.cs.SelectedRowText)).
+			Background(lipgloss.Color(s.cs.SelectedRowBG)).
+			Bold(false)
+
+		s.cache["selectedRow"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) StatusBar() *lipgloss.Style {
+	cv, ok := s.cache["statusBar"]
+	if !ok {
+		cs := lipgloss.NewStyle().
+			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: s.cs.StatusBar.Text}).
+			Background(lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: s.cs.StatusBar.BG})
+
+		s.cache["statusBar"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) TopFiles() *lipgloss.Style {
+	cv, ok := s.cache["topFiles"]
+	if !ok {
+		cs := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(s.cs.TopFilesText)).
 			Bold(true)
 
-	helpDescStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#696868"))
+		s.cache["topFiles"] = &cs
 
-	bindKeyStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#ffbf69"))
+		return &cs
+	}
 
-	dialogBoxStyle = lipgloss.NewStyle().
+	return cv
+}
+
+func (s *Style) Help() *lipgloss.Style {
+	cv, ok := s.cache["help"]
+	if !ok {
+		cs := lipgloss.NewStyle().Foreground(lipgloss.Color(s.cs.HelpText))
+
+		s.cache["help"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) BindKey() *lipgloss.Style {
+	cv, ok := s.cache["bindKey"]
+	if !ok {
+		cs := lipgloss.NewStyle().Foreground(lipgloss.Color(s.cs.BindingText))
+
+		s.cache["bindKey"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) DialogBox() *lipgloss.Style {
+	cv, ok := s.cache["dialogBox"]
+	if !ok {
+		cs := lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("#FF303E"))
+			BorderForeground(lipgloss.Color(s.cs.DialogBoxBorder))
 
-	chartBoxStyle = lipgloss.NewStyle().
-			Inherit(dialogBoxStyle).
-			BorderForeground(lipgloss.Color("240")).
+		s.cache["dialogBox"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) ChartBox() *lipgloss.Style {
+	cv, ok := s.cache["chartBox"]
+	if !ok {
+		cs := lipgloss.NewStyle().
+			Inherit(*s.DialogBox()).
+			BorderForeground(lipgloss.Color(s.cs.ChartColors.Border)).
 			BorderBottom(false)
 
-	confirmButtonStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#FFFDF5")).
-				Background(lipgloss.Color("#353533")).
-				Padding(0, 3).
-				Margin(1, 3)
+		s.cache["chartBox"] = &cs
 
-	activeButtonStyle = confirmButtonStyle.
-				Foreground(lipgloss.Color("#FFFDF5")).
-				Background(lipgloss.Color("#FF8531")).
-				Underline(true)
-)
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) ConfirmButton() *lipgloss.Style {
+	cv, ok := s.cache["confirmButton"]
+	if !ok {
+		cs := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(s.cs.ConfirmButtonText)).
+			Background(lipgloss.Color(s.cs.ConfirmButtonBG)).
+			Padding(0, 3).
+			Margin(1, 3)
+
+		s.cache["confirmButton"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) ActiveButton() *lipgloss.Style {
+	cv, ok := s.cache["activeButton"]
+	if !ok {
+		cs := s.ConfirmButton().
+			Foreground(lipgloss.Color(s.cs.ActiveButtonText)).
+			Background(lipgloss.Color(s.cs.ActiveButtonBG)).
+			Underline(true)
+
+		s.cache["activeButton"] = &cs
+
+		return &cs
+	}
+
+	return cv
+}
+
+func (s *Style) BarBlock(bgColor lipgloss.Color) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Foreground(lipgloss.Color(s.cs.StatusBar.BlockText)).
+		Background(bgColor).
+		Padding(0, 1)
+}
+
+func (s *Style) ChartColors() []lipgloss.Color {
+	return []lipgloss.Color{
+		lipgloss.Color(s.cs.ChartColors.Sector1),
+		lipgloss.Color(s.cs.ChartColors.Sector2),
+		lipgloss.Color(s.cs.ChartColors.Sector3),
+		lipgloss.Color(s.cs.ChartColors.Sector4),
+		lipgloss.Color(s.cs.ChartColors.Sector5),
+		lipgloss.Color(s.cs.ChartColors.Sector6),
+		lipgloss.Color(s.cs.ChartColors.Sector7),
+		lipgloss.Color(s.cs.ChartColors.Sector8),
+		lipgloss.Color(s.cs.ChartColors.Sector9),
+	}
+}

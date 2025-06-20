@@ -216,12 +216,12 @@ func SetTeaProgram(tp *tea.Program) {
 func buildTable() *table.Model {
 	tbl := table.New(table.WithFocused(true))
 
-	style := table.DefaultStyles()
-	style.Header = TableHeaderStyle
-	style.Cell = lipgloss.NewStyle()
-	style.Selected = SelectedRowStyle
+	s := table.DefaultStyles()
+	s.Header = *style.TableHeader()
+	s.Cell = lipgloss.NewStyle()
+	s.Selected = *style.SelectedRow()
 
-	tbl.SetStyles(style)
+	tbl.SetStyles(s)
 
 	tbl.Help = help.New()
 

@@ -168,6 +168,11 @@ Flags:
 
 ## 🙋 FAQ
 
+- **Q:** Why is caching not enabled by default?
+- **A:** The caching flow might work relatively slow in some cases (on Darwin, the decompression happens really slow),
+  but still much faster than regular scanning. This flow still needs to be polished. After that, the caching will become
+  a default behavior.
+  <br><br>
 - **Q:** Can I use this in scripts or headless environments?
 - **A:** Not yet — it's designed for interactive use.
   <br><br>
@@ -179,7 +184,7 @@ Flags:
   formatting, and there are no multiple panes like in the screenshots.
 - **A:** Visual presentation depends on terminal capabilities and font
   configuration. For optimal experience, a terminal with Unicode and glyph
-  support is recommended. The screenshots were made in `WezTerm` using `MesloLGM Nerd Font` font. 
+  support is recommended. The screenshots were made in `WezTerm` using `MesloLGM Nerd Font` font.
 
 ## 🧪 Contributing
 

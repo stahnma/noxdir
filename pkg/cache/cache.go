@@ -52,7 +52,7 @@ func NewCache(opts ...Option) (*Cache, error) {
 		return nil, fmt.Errorf("resolve cache dir: %w", err)
 	}
 
-	if err = os.MkdirAll(cachePath, 0600); err != nil {
+	if err = os.MkdirAll(cachePath, 0750); err != nil {
 		return nil, fmt.Errorf("create cache dir: %w", err)
 	}
 
@@ -172,6 +172,6 @@ func resolveCacheDir(appName string) (string, error) {
 			return "", fmt.Errorf("get home dir: %w", err)
 		}
 
-		return filepath.Join(homeDir, ".cache", appName), nil
+		return filepath.Join(homeDir, appName), nil
 	}
 }

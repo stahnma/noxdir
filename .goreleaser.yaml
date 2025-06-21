@@ -39,6 +39,14 @@ archives:
     format_overrides:
       - goos: windows
         formats: [ zip ]
+    files:
+      - LICENSE*
+      - README*
+      - CHANGELOG
+      - license*
+      - readme*
+      - changelog
+      - man/*
 
 homebrew_casks:
   - name: noxdir

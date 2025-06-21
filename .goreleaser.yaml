@@ -43,6 +43,7 @@ archives:
       - LICENSE*
       - README*
       - man/*
+      - completion/*
 
 homebrew_casks:
   - name: noxdir

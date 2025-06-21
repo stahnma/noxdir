@@ -42,10 +42,6 @@ archives:
     files:
       - LICENSE*
       - README*
-      - CHANGELOG
-      - license*
-      - readme*
-      - changelog
       - man/*
 
 homebrew_casks:

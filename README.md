@@ -25,6 +25,12 @@ cleanup workflow.
 
 ## 📦 Installation
 
+### 🍺 Homebrew (macOS cask)
+```bash
+brew tap crumbyte/noxdir
+brew install --cask noxdir
+```
+
 ### Pre-compiled Binaries
 
 Obtain the latest optimized binary from

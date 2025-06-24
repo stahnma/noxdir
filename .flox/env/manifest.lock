@@ -8,6 +8,15 @@
       },
       "go": {
         "pkg-path": "go"
+      },
+      "iana-etc": {
+        "pkg-path": "iana-etc"
+      },
+      "mailcap": {
+        "pkg-path": "mailcap"
+      },
+      "tzdata": {
+        "pkg-path": "tzdata"
       }
     },
     "options": {
@@ -20,9 +29,18 @@
     },
     "build": {
       "noxdir": {
-        "command": "make build; mkdir -p $out/bin; cp bin/noxdir $out/bin",
-        "version": "v0.1.3",
-        "description": "Terminal utility for visualizing file system usage."
+        "command": "  export GOMODCACHE=${noxdir-deps}\n  mkdir -p $out/bin \n  go build -trimpath -o $out/bin/noxdir .\n  chmod +x $out/bin/noxdir\n",
+        "runtime-packages": [
+          "iana-etc",
+          "mailcap",
+          "tzdata"
+        ],
+        "sandbox": "pure",
+        "version": "v0.1.3-10",
+        "description": "noxdir is a storage visualization tool for the CLI on Mac or Linux"
+      },
+      "noxdir-deps": {
+        "command": "  export GOMODCACHE=$out\n  go mod download -modcacherw\n"
       }
     }
   },
@@ -268,6 +286,370 @@
       ],
       "outputs": {
         "out": "/nix/store/5xvi25nqmbrg58aixp4zgczilfnp7pwg-go-1.24.3"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "iana-etc",
+      "broken": false,
+      "derivation": "/nix/store/6r4aj5x4x48pfvjhzyilqynh984jxhcp-iana-etc-20250108.drv",
+      "description": "IANA protocol and port number assignments (/etc/protocols and /etc/services)",
+      "install_id": "iana-etc",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "iana-etc-20250108",
+      "pname": "iana-etc",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T00:36:16.719701Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20250108",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/zgcpm34m2vasc1kjw4s28fzqmnj447kr-iana-etc-20250108"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "iana-etc",
+      "broken": false,
+      "derivation": "/nix/store/lasrzdzszs4gky5gsws7nv5hmjxagcc8-iana-etc-20250108.drv",
+      "description": "IANA protocol and port number assignments (/etc/protocols and /etc/services)",
+      "install_id": "iana-etc",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "iana-etc-20250108",
+      "pname": "iana-etc",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T00:54:50.606615Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20250108",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/sv8ld1790hffw8j70a1zw3k5l9aji213-iana-etc-20250108"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "iana-etc",
+      "broken": false,
+      "derivation": "/nix/store/yb8q8ginq97f697njlbgv983jpihj0hs-iana-etc-20250108.drv",
+      "description": "IANA protocol and port number assignments (/etc/protocols and /etc/services)",
+      "install_id": "iana-etc",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "iana-etc-20250108",
+      "pname": "iana-etc",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T01:12:23.992034Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20250108",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/hpg81smdpzppnj6833s8m6mxw56gp8jz-iana-etc-20250108"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "iana-etc",
+      "broken": false,
+      "derivation": "/nix/store/ixgdih9f5l3vngk4hbqpgfvnddla5z2x-iana-etc-20250108.drv",
+      "description": "IANA protocol and port number assignments (/etc/protocols and /etc/services)",
+      "install_id": "iana-etc",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "iana-etc-20250108",
+      "pname": "iana-etc",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T01:32:30.286657Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20250108",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/j4gc8fk7wazgn2hqnh0m8b12xx6m1n75-iana-etc-20250108"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "mailcap",
+      "broken": false,
+      "derivation": "/nix/store/ql5psimy9r3h4zss02hbzhw5a1jmjdyj-mailcap-2.1.54.drv",
+      "description": "Helper application and MIME type associations for file types",
+      "install_id": "mailcap",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "mailcap-2.1.54",
+      "pname": "mailcap",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T00:36:18.199493Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.54",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/q5db5mwc8spcx002ibmlz4w9266b7jlx-mailcap-2.1.54"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "mailcap",
+      "broken": false,
+      "derivation": "/nix/store/rii3baqb9w0g71n6n9qp6zb5pzszpmdd-mailcap-2.1.54.drv",
+      "description": "Helper application and MIME type associations for file types",
+      "install_id": "mailcap",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "mailcap-2.1.54",
+      "pname": "mailcap",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T00:54:57.561981Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.54",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/cnfrm7vbghw44sq4y5m7ibz53fvsjf14-mailcap-2.1.54"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "mailcap",
+      "broken": false,
+      "derivation": "/nix/store/j2llx8r2ilb71fp0xqfg4c097hq0fp50-mailcap-2.1.54.drv",
+      "description": "Helper application and MIME type associations for file types",
+      "install_id": "mailcap",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "mailcap-2.1.54",
+      "pname": "mailcap",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T01:12:25.512669Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.54",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/5s4rg6bl4cj6997vf2nhpigy6iiwdj18-mailcap-2.1.54"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "mailcap",
+      "broken": false,
+      "derivation": "/nix/store/5l76vnacd269g7ns8i6v4vjwibwfpibw-mailcap-2.1.54.drv",
+      "description": "Helper application and MIME type associations for file types",
+      "install_id": "mailcap",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "mailcap-2.1.54",
+      "pname": "mailcap",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T01:32:38.956508Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.54",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/1jj2lq1kzys105rqq5n1a2r4v59arz43-mailcap-2.1.54"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tzdata",
+      "broken": false,
+      "derivation": "/nix/store/iw374iigbdl19xykkknixgn72cx7l5hv-tzdata-2025b.drv",
+      "description": "Database of current and historical time zones",
+      "install_id": "tzdata",
+      "license": "[ BSD-3-Clause, Public Domain ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "tzdata-2025b",
+      "pname": "tzdata",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T00:37:12.480197Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2025b",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/7b543zq9zm3hgrdndif2xafmwpnd9v44-tzdata-2025b-bin",
+        "dev": "/nix/store/w3kh9d9g8mg9kbrrl8hmmb058mlkzycz-tzdata-2025b-dev",
+        "man": "/nix/store/ji3022zz42civ9513ilba3p0wbp2bjf6-tzdata-2025b-man",
+        "out": "/nix/store/f545i7prifny24kk1zfjf3z3bg7p05zg-tzdata-2025b"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tzdata",
+      "broken": false,
+      "derivation": "/nix/store/cjn1wz7r30s7pdll3hnsxwz5vgyn2nzm-tzdata-2025b.drv",
+      "description": "Database of current and historical time zones",
+      "install_id": "tzdata",
+      "license": "[ BSD-3-Clause, Public Domain ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "tzdata-2025b",
+      "pname": "tzdata",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T00:56:18.835982Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2025b",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/6j2z9cndprm8rdjnva86sf9hqsiq79sc-tzdata-2025b-bin",
+        "dev": "/nix/store/pkhadzijdw03m7cirz8y8crvwsnf8iy1-tzdata-2025b-dev",
+        "man": "/nix/store/r28jsmicwfk92i05mrb8iagcyfp0jgp1-tzdata-2025b-man",
+        "out": "/nix/store/x1fic8wpbpk5f04prm946g6a07g2yxf4-tzdata-2025b"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tzdata",
+      "broken": false,
+      "derivation": "/nix/store/njfwr6myr7m6j4x6q6ji5wfhzgj7y550-tzdata-2025b.drv",
+      "description": "Database of current and historical time zones",
+      "install_id": "tzdata",
+      "license": "[ BSD-3-Clause, Public Domain ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "tzdata-2025b",
+      "pname": "tzdata",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T01:13:21.249521Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2025b",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/hl1882yqy82j6jr0vxzs76xw65b38phb-tzdata-2025b-bin",
+        "dev": "/nix/store/7c4rwgq9wvc3zx9cwbz01hqi64dcm6bz-tzdata-2025b-dev",
+        "man": "/nix/store/svk0zf6rkr5g2ylnf26aqdfvig3y12nz-tzdata-2025b-man",
+        "out": "/nix/store/aksbfjni9x81vs0g4c1nyzbkmk89anhx-tzdata-2025b"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tzdata",
+      "broken": false,
+      "derivation": "/nix/store/3p9xrl8radiqha6czkpakmv3r11gh1pa-tzdata-2025b.drv",
+      "description": "Database of current and historical time zones",
+      "install_id": "tzdata",
+      "license": "[ BSD-3-Clause, Public Domain ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "name": "tzdata-2025b",
+      "pname": "tzdata",
+      "rev": "9e83b64f727c88a7711a2c463a7b16eedb69a84c",
+      "rev_count": 816272,
+      "rev_date": "2025-06-17T04:31:58Z",
+      "scrape_date": "2025-06-18T01:34:06.412813Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2025b",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/ap6xaihj78d8c85fpb4knfs5vqhpnv1w-tzdata-2025b-bin",
+        "dev": "/nix/store/lwh5d2f7fmjg7hgrppwbn78w2aigmv08-tzdata-2025b-dev",
+        "man": "/nix/store/axbh5vzavw21dcz1avs6zfw0lkmx3xmq-tzdata-2025b-man",
+        "out": "/nix/store/qyihkwbhd70ynz380whj3bsxk1d2lyc4-tzdata-2025b"
       },
       "system": "x86_64-linux",
       "group": "toplevel",

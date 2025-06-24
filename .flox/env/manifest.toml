@@ -2,11 +2,14 @@ version = 1
 
 [install]
 go.pkg-path = "go"
+gnumake.pkg-path = "gnumake"
 
 [build.noxdir]
-command = "mkdir -p $out/bin && go build -trimpath . ; mv noxdir $out/bin/noxdir"
+
+command = "make build; mkdir -p $out/bin; cp bin/noxdir $out/bin"
+description = "Terminal utility for visualizing file system usage."
 version = "v0.1.3"
-description = "noxdir is a storage visualization tool for the CLI on Mac or Linux"
+
 
 [options]
 # Systems that environment is compatible with

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cmp"
 	"iter"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -162,4 +163,115 @@ func (e *Entry) SortChild() *Entry {
 	})
 
 	return e
+}
+
+func (e *Entry) Copy() *Entry {
+	return &Entry{
+		Path:       e.Path,
+		Child:      make([]*Entry, 0, len(e.Child)),
+		IsDir:      e.IsDir,
+		ModTime:    e.ModTime,
+		Size:       e.Size,
+		LocalDirs:  e.LocalDirs,
+		LocalFiles: e.LocalFiles,
+		TotalDirs:  e.TotalDirs,
+		TotalFiles: e.TotalFiles,
+	}
+}
+
+func (e *Entry) Diff(ne *Entry) Diff {
+	var ep EntryPair
+
+	d := Diff{Added: make([]*Entry, 0), Removed: make([]*Entry, 0)}
+
+	queue := []EntryPair{{e, ne}}
+
+	for len(queue) > 0 {
+		ep, queue = queue[0], queue[1:]
+
+		if len(ep[0].Child) == 0 {
+			break
+		}
+
+		diff := EntryList(ep[0].Child).Diff(ep[1].Child)
+
+		d.Added = append(d.Added, diff.Added...)
+		d.Removed = append(d.Removed, diff.Removed...)
+
+		for _, sameEntries := range diff.Same {
+			if sameEntries[0].IsDir {
+				queue = append(queue, sameEntries)
+			}
+		}
+	}
+
+	return d
+}
+
+type EntryPair [2]*Entry
+
+type Diff struct {
+	Same    []EntryPair
+	Added   []*Entry
+	Removed []*Entry
+}
+
+func (d *Diff) TotalAdded() int64 {
+	total := int64(0)
+
+	for _, entry := range d.Added {
+		total += entry.Size
+	}
+
+	return total
+}
+
+func (d *Diff) TotalRemoved() int64 {
+	total := int64(0)
+
+	for _, entry := range d.Removed {
+		total += entry.Size
+	}
+
+	return total
+}
+
+type EntryList []*Entry
+
+func (el EntryList) Diff(newList EntryList) Diff {
+	d := Diff{
+		Same:    make([]EntryPair, 0),
+		Added:   make([]*Entry, 0),
+		Removed: make([]*Entry, 0),
+	}
+
+	if len(newList) == 0 {
+		return d
+	}
+
+	elMap := make(map[string]*Entry, len(el))
+
+	for _, entry := range el {
+		elMap[entry.Path] = entry
+	}
+
+	for _, newChild := range newList {
+		oldChild, ok := elMap[newChild.Path]
+
+		if ok && oldChild.IsDir == newChild.IsDir {
+			d.Same = append(d.Same, EntryPair{oldChild, newChild})
+
+			delete(elMap, newChild.Path)
+
+			continue
+		}
+
+		d.Added = append(d.Added, newChild)
+	}
+
+	for removed := range maps.Values(elMap) {
+		d.Removed = append(d.Removed, removed)
+	}
+
+	return d
 }

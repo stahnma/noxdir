@@ -1,0 +1,43 @@
+version = 1
+
+[install]
+go.pkg-path = "go"
+gnumake.pkg-path = "gnumake"
+iana-etc.pkg-path = "iana-etc"
+mailcap.pkg-path = "mailcap"
+tzdata.pkg-path = "tzdata"
+
+
+[build.noxdir-deps]
+command = '''
+  export GOMODCACHE=$out
+  go mod download -modcacherw
+'''
+
+[build.noxdir]
+command = """
+  export GOMODCACHE=${noxdir-deps}
+  mkdir -p $out/bin 
+  go build -trimpath -o $out/bin/noxdir .
+  chmod +x $out/bin/noxdir
+"""
+sandbox = "pure"
+version = "v0.1.3-10-t"
+description = "noxdir is a storage visualization tool for the CLI on Mac or Linux"
+
+# Once the program is built, we don't need "go", but we do need things any go
+# program assumes are there.
+runtime-packages = [ "iana-etc", "mailcap", "tzdata" ] 
+
+
+
+
+[options]
+# Systems that environment is compatible with
+systems = [
+  "aarch64-darwin",
+  "aarch64-linux",
+  "x86_64-darwin",
+  "x86_64-linux",
+]
+
